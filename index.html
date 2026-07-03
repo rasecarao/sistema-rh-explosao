@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exp Pessoas — Sistema de Gestão de Pessoas</title>
-<link rel="icon" type="image/png" href="https://explosaoalimentos.com.br/wp-content/uploads/2024/11/logo-menor-e1731554322568.png">
+<link rel="icon" type="image/png" href="https://rasecarao.github.io/sistema-rh-explosao/logo.png">
+<link rel="shortcut icon" href="https://rasecarao.github.io/sistema-rh-explosao/logo.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://rasecarao.github.io/sistema-rh-explosao/">
 <meta property="og:title" content="Exp Pessoas — Sistema de Gestão de Pessoas">
@@ -299,7 +300,7 @@ tbody tr:hover td{background:var(--bg)}
 <!-- ═══ TELA DE LOGIN ════════════════════════════════════ -->
 <div id="login-overlay" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0d3320 0%,#1a5c38 50%,#0d3320 100%);display:flex;align-items:center;justify-content:center;flex-direction:column">
   <div style="text-align:center;margin-bottom:32px">
-    <img src="https://explosaoalimentos.com.br/wp-content/uploads/2024/11/logo-menor-e1731554322568.png" style="height:56px;margin-bottom:12px">
+    <img src="https://rasecarao.github.io/sistema-rh-explosao/logo.png" style="height:56px;margin-bottom:12px" onerror="this.src='https://explosaoalimentos.com.br/wp-content/uploads/2024/11/logo-menor-e1731554322568.png'">
     <div style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px;text-shadow:-1px -1px 0 #28589B,1px -1px 0 #28589B,-1px 1px 0 #28589B,1px 1px 0 #28589B">Exp Pessoas</div>
     <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:4px">Sistema de Gestão de Pessoas</div>
   </div>
@@ -429,7 +430,7 @@ tbody tr:hover td{background:var(--bg)}
 
 <div class="topbar">
   <div class="topbar-title">
-    <img src="https://explosaoalimentos.com.br/wp-content/uploads/2024/11/logo-menor-e1731554322568.png" alt="Explosão Alimentos" style="height:38px;width:auto;object-fit:contain">
+    <img src="https://rasecarao.github.io/sistema-rh-explosao/logo.png" alt="Explosão Alimentos" style="height:38px;width:auto;object-fit:contain" onerror="this.src='https://explosaoalimentos.com.br/wp-content/uploads/2024/11/logo-menor-e1731554322568.png'">
     <div style="display:flex;flex-direction:column;line-height:1.2">
       <span style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.3px">Exp Pessoas</span>
       <span style="font-size:11px;color:var(--text3);font-weight:400">Sistema de Gestão de Pessoas</span>
@@ -3655,6 +3656,23 @@ function detectarEPreencherTipo(selectId,inputId,valor){
   if(tipo){
     sel.value=tipo;
     trocarTipoChavePix(selectId,inputId);
+    // Aplica valor com máscara correta conforme tipo
+    switch(tipo){
+      case'cpf':
+        inp.value=mascaraCPFPix(s.replace(/\D/g,''));
+        break;
+      case'celular':
+        inp.value=mascaraTelPix(s.replace(/\D/g,''));
+        break;
+      case'cnpj':
+        var d=s.replace(/\D/g,'');
+        inp.value=d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5')||s;
+        break;
+      default:
+        inp.value=s;
+    }
+  } else {
+    // Tipo não detectado: coloca valor bruto direto
     inp.value=s;
   }
 }
@@ -3691,7 +3709,31 @@ function compartilharPix(id){
 
 function abrirSharePix(obj){
   _pixShareMsg=montarMsgPix(obj);
-  _pixPayload=obj.pixCopiaECola||'';
+
+  // Se não tem payload salvo, regenera na hora a partir dos dados do pagamento
+  if(obj.pixCopiaECola){
+    _pixPayload=obj.pixCopiaECola;
+  } else if(obj.pix && obj.valor){
+    try{
+      _pixPayload=gerarPixEMV(
+        obj.pix,
+        parseFloat(obj.valor)||0,
+        (obj.colaboradorNome||'').substring(0,25).toUpperCase().replace(/[^A-Z0-9 ]/g,''),
+        'GOIANIA',
+        (obj.tipo||'PIX').substring(0,35),
+        String(obj.id||'').substring(0,25)
+      );
+      // Salva para próxima vez
+      obj.pixCopiaECola=_pixPayload;
+      sincronizarScript('editarPagamentoPix',obj);
+    }catch(e){
+      _pixPayload='';
+      console.warn('Erro ao gerar payload PIX:',e);
+    }
+  } else {
+    _pixPayload='';
+  }
+
   document.getElementById('pix-share-chave').textContent=obj.pix||'—';
   document.getElementById('pix-share-msg').textContent=_pixShareMsg;
   const tel=(obj.pix||'').replace(/\D/g,'');
@@ -3706,6 +3748,9 @@ function abrirSharePix(obj){
     gerarQRCodePix(_pixPayload);
   } else {
     section.style.display='none';
+    document.getElementById('pix-qr-loading').textContent='Chave PIX ou valor não encontrado — edite o pagamento para gerar o QR.';
+    document.getElementById('pix-qr-canvas').style.display='none';
+    section.style.display='block';
   }
   abrirModal('modal-pix-share');
 }
@@ -6099,11 +6144,17 @@ function abrirModalPix(editId){
   document.getElementById('pix-chave').placeholder='Selecione o tipo ao lado';
   document.getElementById('pix-data-sol').value=hoje();
   document.getElementById('btn-salvar-pix').onclick=()=>salvarPix(editId||null);
-  populateSelectColabs(['pix-colab','pix-filtro-colab']);
+
+  // Popula colaboradores sem disparar onchange
+  populateSelectColabs(['pix-filtro-colab']);
+  populateSelectColabsSilent('pix-colab');
+
   if(editId){
     const p=DB.pagamentos_pix.find(x=>String(x.id)===String(editId));
     if(p){
+      // Define colaborador sem disparar preencherPix (que sobrescreveria a chave)
       document.getElementById('pix-colab').value=p.colaboradorId;
+      // Carrega chave do próprio pagamento, não do cadastro do colaborador
       document.getElementById('pix-chave-tipo').value='';
       detectarEPreencherTipo('pix-chave-tipo','pix-chave',p.pix||'');
       document.getElementById('pix-tipo').value=p.tipo||'';
@@ -6114,8 +6165,19 @@ function abrirModalPix(editId){
       document.getElementById('pix-obs').value=p.obs||'';
       document.getElementById('pix-motivo').value=p.motivo||'';
     }
+  } else {
+    // Novo pagamento: popula normalmente com onchange ativo
+    populateSelectColabs(['pix-colab']);
   }
   abrirModal('modal-pix');
+}
+
+// Popula select de colaboradores SEM disparar onchange
+function populateSelectColabsSilent(selectId){
+  const sel=document.getElementById(selectId);
+  if(!sel)return;
+  const colabs=(DB.colaboradores||[]).filter(c=>c.status!=='Desligado').sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+  sel.innerHTML='<option value="">Selecione...</option>'+colabs.map(c=>`<option value="${c.id}">${c.nome}${c.empresa?' — '+c.empresa:''}</option>`).join('');
 }
 
 function salvarPix(editId){
@@ -6133,7 +6195,8 @@ function salvarPix(editId){
   const chavePix=normalizarChavePix(chaveRaw);
   const statusAtual=editId!=null?(DB.pagamentos_pix.find(x=>String(x.id)===String(editId))?.status||'Solicitado'):'Solicitado';
   const criadoEm=editId!=null?(DB.pagamentos_pix.find(x=>String(x.id)===String(editId))?.criadoEm||agora):agora;
-  const txid='RH'+String(gerarId()).toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,21);
+  // Preserva txid original ao editar (não gerar novo)
+  const txid=editId!=null?(DB.pagamentos_pix.find(x=>String(x.id)===String(editId))?.txid||'RH'+String(gerarId()).toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,21)):('RH'+String(gerarId()).toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,21));
   const localStr=localStorage.getItem('rh_empresa_cidade')||'Trindade - GO';
   const cidade=removerAcentos(localStr.split('-')[0]||localStr).trim().substring(0,15).toUpperCase();
   const nomeRecebedor=removerAcentos(c?.nome||'FUNCIONARIO').substring(0,25).toUpperCase();
@@ -6156,7 +6219,9 @@ function salvarPix(editId){
   } else {DB.pagamentos_pix.push(obj);}
   salvarDB();
   sincronizarScript(editId!=null?'editarPagamentoPix':'novoPagamentoPix',obj);
-  fecharModal('modal-pix');renderPix();
+  fecharModal('modal-pix');
+  // Pequeno delay para garantir que renderPix use dados já atualizados
+  setTimeout(renderPix,50);
   notify(editId?'Pagamento atualizado!':'Pagamento registrado para '+(c?.nome||'')+' — '+fmtMoeda(valor));
   // Abre modal de compartilhamento apenas para novos pagamentos
   if(editId==null) abrirSharePix(obj);
@@ -6230,6 +6295,7 @@ function renderPix(){
       +'<div style="display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:8px">'
         +(bts[p.status]||'')
         +'<button class="btn btn-sm" onclick="abrirModalPix(\''+id+'\')">✏️ Editar</button>'
+        +'<button class="btn btn-sm" onclick="compartilharPix(\''+id+'\')" style="background:#1a5c38;color:#fff;border-color:#1a5c38">🔍 Ver QR</button>'
         +(p.pixCopiaECola?'<button class="btn btn-sm" onclick="copiarPixDireto(\''+id+'\')" style="background:#0070f3;color:#fff;border-color:#0070f3">📲 Copiar Pix</button>':'')
         +'<button class="btn btn-sm" onclick="compartilharPix(\''+id+'\')" style="background:#25D366;color:#fff;border-color:#25D366">📱 Enviar</button>'
         +'<button class="btn btn-sm btn-danger" onclick="excluirPagamentoPix(\''+id+'\')">🗑</button>'
@@ -6239,39 +6305,47 @@ function renderPix(){
 }
 
 // INIT
-window.addEventListener('DOMContentLoaded',async()=>{
-  // Se há URL do Sheets, sincroniza PRIMEIRO para carregar usuários do servidor
-  // antes de mostrar o login — resolve o problema do GitHub Pages
+window.addEventListener('DOMContentLoaded',()=>{
+  // Mostra login imediatamente — não bloqueia a UI esperando o Sheets
+  inicializarLogin();
+
+  // Sincroniza em background APÓS login, sem redirecionar página
   if(SCRIPT_URL){
     setSyncStatus('loading','Sincronizando...');
-    try{
-      const r=await fetch(SCRIPT_URL+'?action=listarTodos');
-      const d=await r.json();
-      if(d.ok&&d.result){
-        if(d.result.colaboradores&&Array.isArray(d.result.colaboradores))DB.colaboradores=d.result.colaboradores.map(c=>({...c,pix:preservarChavePix(String(c.pix||''))}));
-        if(d.result.ferias_gozo&&Array.isArray(d.result.ferias_gozo))DB.ferias_gozo=d.result.ferias_gozo;
-        if(d.result.advertencias&&Array.isArray(d.result.advertencias))DB.advertencias=d.result.advertencias;
-        if(d.result.cargos&&Array.isArray(d.result.cargos))DB.cargos=d.result.cargos;
-        if(d.result.desligamentos&&Array.isArray(d.result.desligamentos))DB.desligamentos=d.result.desligamentos;
-        if(d.result.historico_cargo&&Array.isArray(d.result.historico_cargo))DB.historico_cargo=d.result.historico_cargo;
-        if(d.result.documentos&&Array.isArray(d.result.documentos))DB.documentos=d.result.documentos;
-        if(d.result.talentos&&Array.isArray(d.result.talentos))DB.talentos=d.result.talentos;
-        if(d.result.pagamentos_pix&&Array.isArray(d.result.pagamentos_pix))DB.pagamentos_pix=d.result.pagamentos_pix;
-        if(d.result.vales&&Array.isArray(d.result.vales))DB.vales=d.result.vales;
-        // Carrega usuários do Sheets e salva no localStorage
-        if(d.result.usuarios&&Array.isArray(d.result.usuarios)&&d.result.usuarios.length){
-          DB.usuarios=d.result.usuarios;
-          localStorage.setItem('exp_usuarios',JSON.stringify(d.result.usuarios));
+    fetch(SCRIPT_URL+'?action=listarTodos')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.ok&&d.result){
+          var r=d.result;
+          if(r.colaboradores&&Array.isArray(r.colaboradores))DB.colaboradores=r.colaboradores.map(function(c){return Object.assign({},c,{pix:preservarChavePix(String(c.pix||''))});});
+          if(r.ferias_gozo&&Array.isArray(r.ferias_gozo))DB.ferias_gozo=r.ferias_gozo;
+          if(r.advertencias&&Array.isArray(r.advertencias))DB.advertencias=r.advertencias;
+          if(r.cargos&&Array.isArray(r.cargos))DB.cargos=r.cargos;
+          if(r.desligamentos&&Array.isArray(r.desligamentos))DB.desligamentos=r.desligamentos;
+          if(r.historico_cargo&&Array.isArray(r.historico_cargo))DB.historico_cargo=r.historico_cargo;
+          if(r.documentos&&Array.isArray(r.documentos))DB.documentos=r.documentos;
+          if(r.talentos&&Array.isArray(r.talentos))DB.talentos=r.talentos;
+          if(r.pagamentos_pix&&Array.isArray(r.pagamentos_pix))DB.pagamentos_pix=r.pagamentos_pix;
+          if(r.vales&&Array.isArray(r.vales))DB.vales=r.vales;
+          if(r.usuarios&&Array.isArray(r.usuarios)&&r.usuarios.length){
+            DB.usuarios=r.usuarios;
+            localStorage.setItem('exp_usuarios',JSON.stringify(r.usuarios));
+          }
+          salvarDB();
+          setSyncStatus('online','Sincronizado');
+          // Atualiza APENAS a página que o usuário está vendo, sem redirecionar
+          var pAtiva=document.querySelector('.page:not([style*="none"])');
+          if(pAtiva){
+            var pid=pAtiva.id||'';
+            if(pid==='page-dashboard')renderDashboard();
+            else if(pid==='page-colaboradores')filtrarColabs();
+            else if(pid==='page-pix')renderPix();
+            else if(pid==='page-pagamentos')renderPagePagamentos&&renderPagePagamentos();
+          }
         }
-        salvarDB();
-        setSyncStatus('online','Sincronizado');
-      }
-    }catch(e){
-      setSyncStatus('offline','Sem conexão');
-    }
+      })
+      .catch(function(){setSyncStatus('offline','Sem conexão');});
   }
-  // Só mostra login depois de tentar carregar dados
-  inicializarLogin();
 });
 
 // ══════════════════════════════════════════════════════════
