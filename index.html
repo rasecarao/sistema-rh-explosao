@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exp Pessoas — Sistema de Gestão de Pessoas</title>
-<link rel="icon" type="image/png" href="https://rasecarao.github.io/sistema-rh-explosao/logo.png">
-<link rel="shortcut icon" href="https://rasecarao.github.io/sistema-rh-explosao/logo.png">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a5c38'/><text y='.9em' font-size='80' x='10'>🌿</text></svg>">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://rasecarao.github.io/sistema-rh-explosao/">
 <meta property="og:title" content="Exp Pessoas — Sistema de Gestão de Pessoas">
@@ -38,13 +38,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-siz
 .topbar-sub{color:var(--text2);font-weight:400;font-size:13px}
 .topbar-right{display:flex;gap:8px;align-items:center}
 .sync-info{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:#27ae60;flex-shrink:0}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#27ae60;flex-shrink:0;transition:background .3s}
 .sync-dot.offline{background:#e74c3c}
+.sync-dot.loading{background:#f59e0b;animation:pulse-dot 1s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+/* Evita repaint/flicker no topbar durante animações */
+.topbar{contain:layout style;}
 
 /* NAV — padrão WMS */
-.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 .5rem;display:flex;gap:0px;overflow-x:auto;position:sticky;top:64px;z-index:49}
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 .5rem;display:flex;flex-wrap:wrap;gap:0;position:sticky;top:64px;z-index:49;overflow-x:hidden}
 .nav::-webkit-scrollbar{height:3px}
-.nav-btn{padding:10px 10px;font-size:12px;color:var(--text2);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:4px}
+.nav-btn{padding:8px 8px;font-size:11.5px;color:var(--text2);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:3px}
 .nav-btn:hover{color:var(--text)}
 .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 .nav-icon{font-size:14px}
@@ -300,7 +304,7 @@ tbody tr:hover td{background:var(--bg)}
 <!-- ═══ TELA DE LOGIN ════════════════════════════════════ -->
 <div id="login-overlay" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0d3320 0%,#1a5c38 50%,#0d3320 100%);display:flex;align-items:center;justify-content:center;flex-direction:column">
   <div style="text-align:center;margin-bottom:32px">
-    <img src="https://rasecarao.github.io/sistema-rh-explosao/logo.png" style="height:56px;margin-bottom:12px" onerror="this.src='https://explosaoalimentos.com.br/wp-content/uploads/2024/11/logo-menor-e1731554322568.png'">
+    <img src="logo.png" style="height:56px;margin-bottom:12px" onerror="this.style.display='none'">
     <div style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px;text-shadow:-1px -1px 0 #28589B,1px -1px 0 #28589B,-1px 1px 0 #28589B,1px 1px 0 #28589B">Exp Pessoas</div>
     <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:4px">Sistema de Gestão de Pessoas</div>
   </div>
@@ -430,7 +434,7 @@ tbody tr:hover td{background:var(--bg)}
 
 <div class="topbar">
   <div class="topbar-title">
-    <img src="https://rasecarao.github.io/sistema-rh-explosao/logo.png" alt="Explosão Alimentos" style="height:38px;width:auto;object-fit:contain" onerror="this.src='https://explosaoalimentos.com.br/wp-content/uploads/2024/11/logo-menor-e1731554322568.png'">
+    <img src="logo.png" alt="Explosão Alimentos" style="height:38px;width:auto;object-fit:contain" onerror="this.style.display='none'">
     <div style="display:flex;flex-direction:column;line-height:1.2">
       <span style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.3px">Exp Pessoas</span>
       <span style="font-size:11px;color:var(--text3);font-weight:400">Sistema de Gestão de Pessoas</span>
@@ -455,12 +459,14 @@ tbody tr:hover td{background:var(--bg)}
   <button class="nav-btn" onclick="showPage('ferias',this)"><span class="nav-icon">🏖️</span>Férias</button>
   <button class="nav-btn" onclick="showPage('carreira',this)"><span class="nav-icon">📈</span>Carreira</button>
   <button class="nav-btn" onclick="showPage('advertencias',this)"><span class="nav-icon">⚠️</span>Advertências</button>
+  <button class="nav-btn" onclick="showPage('atestados',this)"><span class="nav-icon">🏥</span>Atestados</button>
   <button class="nav-btn" onclick="showPage('aniversarios',this)"><span class="nav-icon">🎂</span>Aniversários</button>
   <button class="nav-btn" onclick="showPage('desligamentos',this)"><span class="nav-icon">📋</span>Desligamentos</button>
   <button class="nav-btn" onclick="showPage('documentos',this)"><span class="nav-icon">📁</span>Documentos</button>
   <button class="nav-btn" onclick="showPage('talentos',this)"><span class="nav-icon">🎯</span>Banco de Talentos</button>
   <button class="nav-btn" onclick="showPage('pagamentos',this)"><span class="nav-icon">💰</span>Pagamentos</button>
   <button class="nav-btn" onclick="showPage('pix',this)"><span class="nav-icon">💸</span>Pagamentos PIX</button>
+  <button class="nav-btn" onclick="showPage('calendario',this)"><span class="nav-icon">📅</span>Calendário</button>
   <button class="nav-btn" onclick="showPage('config',this)"><span class="nav-icon">⚙️</span>Configurações</button>
 </nav>
 
@@ -746,6 +752,125 @@ tbody tr:hover td{background:var(--bg)}
       </div>
       <div id="lista-advertencias"><div class="empty">Nenhuma advertência emitida.</div></div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ ATESTADOS MÉDICOS ════════════════════════════════ -->
+<div class="page" id="page-atestados">
+  <div class="grid2">
+
+    <!-- Formulário -->
+    <div class="card">
+      <div class="card-title">🏥 Registrar Atestado</div>
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Colaborador *</label>
+          <select id="at-colaborador"><option value="">Selecione...</option></select>
+        </div>
+        <div class="form-group">
+          <label>Data do Atestado *</label>
+          <input type="date" id="at-data">
+        </div>
+        <div class="form-group">
+          <label>Dias Afastados *</label>
+          <input type="number" id="at-dias" min="1" max="365" placeholder="Ex: 2">
+        </div>
+        <div class="form-group">
+          <label>CID (Código)</label>
+          <input type="text" id="at-cid" placeholder="Ex: J06.9" style="text-transform:uppercase" maxlength="10" oninput="this.value=this.value.toUpperCase();buscarCID(this.value)">
+          <div id="at-cid-desc" style="font-size:11px;color:var(--accent);margin-top:3px;min-height:16px"></div>
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="at-tipo">
+            <option value="Atestado Médico">Atestado Médico</option>
+            <option value="Atestado Odontológico">Atestado Odontológico</option>
+            <option value="Declaração de Comparecimento">Declaração de Comparecimento</option>
+            <option value="Afastamento INSS">Afastamento INSS</option>
+            <option value="Licença Maternidade">Licença Maternidade</option>
+            <option value="Licença Paternidade">Licença Paternidade</option>
+            <option value="Acompanhante (dependente)">Acompanhante (dependente)</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Médico / CRM</label>
+          <input type="text" id="at-medico" placeholder="Ex: Dr. João Silva — CRM 12345">
+        </div>
+        <div class="form-group">
+          <label>Hora de Chegada</label>
+          <input type="time" id="at-hora-chegada" placeholder="Se veio depois">
+        </div>
+        <div class="form-group">
+          <label>Hora de Saída</label>
+          <input type="time" id="at-hora-saida" placeholder="Se saiu antes">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Observação</label>
+          <input type="text" id="at-obs" placeholder="Observações adicionais...">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="at-afasta" onchange="toggleAfastamentoAtestado()">
+            Afastar colaborador durante o período
+          </label>
+          <div id="at-afasta-info" style="font-size:11px;color:var(--text3);margin-top:4px;display:none">
+            O status do colaborador será alterado para <b>Afastado</b> e restaurado para <b>Ativo</b> automaticamente ao fim do período.
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="salvarAtestado()">💾 Registrar</button>
+        <button class="btn" onclick="limparFormAtestado()">✕ Limpar</button>
+      </div>
+    </div>
+
+    <!-- Histórico -->
+    <div class="card">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+        📋 Histórico de Atestados
+        <button class="btn btn-sm" onclick="gerarRelatorioAtestados()" style="background:#1a5c38;color:#fff;border-color:#1a5c38">📄 Relatório PDF</button>
+      </div>
+
+      <!-- KPIs rápidos -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px" id="at-kpis">
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:8px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:#2563eb" id="at-kpi-total">0</div>
+          <div style="font-size:10px;color:var(--text3)">Total ano</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:8px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:#dc2626" id="at-kpi-dias">0</div>
+          <div style="font-size:10px;color:var(--text3)">Dias perdidos</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:8px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:#7c3aed" id="at-kpi-colab">0</div>
+          <div style="font-size:10px;color:var(--text3)">Colaboradores</div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <input type="text" id="at-busca" placeholder="Buscar colaborador..." oninput="renderAtestados()" style="flex:1;min-width:150px">
+        <select id="at-filtro-empresa" onchange="renderAtestados()">
+          <option value="">Todas as Empresas</option>
+          <option value="Explosão Alimentos">Explosão Alimentos</option>
+          <option value="AGS Distribuidora">AGS Distribuidora</option>
+        </select>
+        <select id="at-filtro-ano" onchange="renderAtestados()"></select>
+        <select id="at-filtro-tipo" onchange="renderAtestados()">
+          <option value="">Todos os tipos</option>
+          <option>Atestado Médico</option>
+          <option>Atestado Odontológico</option>
+          <option>Declaração de Comparecimento</option>
+          <option>Afastamento INSS</option>
+          <option>Licença Maternidade</option>
+          <option>Licença Paternidade</option>
+          <option>Acompanhante (dependente)</option>
+        </select>
+      </div>
+      <div id="lista-atestados"><div class="empty">Nenhum atestado registrado.</div></div>
+    </div>
+
   </div>
 </div>
 
@@ -1042,6 +1167,113 @@ tbody tr:hover td{background:var(--bg)}
     </div>
   </div>
 
+</div>
+
+<!-- ═══ PÁGINA CALENDÁRIO ════════════════════════════════ -->
+<div class="page" id="page-calendario">
+  <div style="max-width:900px">
+
+    <!-- Cabeçalho -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--text)">📅 Calendário</div>
+        <div style="font-size:12px;color:var(--text3)">Versão publicação + gestão operacional</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="cal-ano" onchange="renderCalendario()" style="font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"></select>
+        <button class="btn btn-primary" onclick="abrirModalEvento()">＋ Evento</button>
+        <button class="btn" onclick="gerarPDFCalendario()" style="background:#b91c1c;color:#fff;border-color:#b91c1c">📄 Gerar PDF</button>
+        <button class="btn" onclick="compartilharCalendarioWpp()" style="background:#25D366;color:#fff;border-color:#25D366">📱 WhatsApp</button>
+      </div>
+    </div>
+
+    <!-- Legenda -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+      <div id="cal-legenda"></div>
+    </div>
+
+    <!-- Abas -->
+    <div style="display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:16px">
+      <button id="caltab-btn-anual" onclick="switchCalTab('anual')" style="padding:9px 16px;font-size:12px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid var(--accent);color:var(--accent)">📆 Anual (Publicação)</button>
+      <button id="caltab-btn-mensal" onclick="switchCalTab('mensal')" style="padding:9px 16px;font-size:12px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text2)">📋 Mensal (Operacional)</button>
+      <button id="caltab-btn-pagamentos" onclick="switchCalTab('pagamentos')" style="padding:9px 16px;font-size:12px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text2)">💰 Datas de Pagamento</button>
+    </div>
+
+    <!-- Aba Pagamentos -->
+    <div id="caltab-pagamentos" style="display:none">
+      <div style="max-width:640px">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:14px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius);border-left:3px solid var(--accent)">
+          ℹ️ Pagamentos que caem em <b>sábado ou domingo são antecipados automaticamente para a sexta</b> anterior. Aqui você pode ajustar manualmente qualquer data — ou desativar uma das parcelas para um mês específico.
+        </div>
+        <div id="cal-pag-tabela"></div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button class="btn btn-primary" onclick="salvarConfigPagamentos()">💾 Salvar configurações</button>
+          <button class="btn" onclick="resetarConfigPagamentos()">↺ Restaurar padrão</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aba Anual -->
+    <div id="caltab-anual">
+      <div id="cal-grid-anual" style="display:grid;grid-template-columns:1fr 1fr;gap:16px"></div>
+    </div>
+
+    <!-- Aba Mensal -->
+    <div id="caltab-mensal" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <button onclick="navMes(-1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:16px">‹</button>
+        <div id="cal-mes-titulo" style="font-size:16px;font-weight:700;flex:1;text-align:center"></div>
+        <button onclick="navMes(1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:16px">›</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div id="cal-grid-mensal"></div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📋 Agenda do mês</div>
+          <div id="cal-agenda-mensal" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Evento -->
+<div class="modal-overlay hidden" id="modal-evento-cal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3 id="modal-evento-titulo">Novo Evento</h3>
+      <button class="modal-close" onclick="fecharModal('modal-evento-cal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="evt-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="form-group"><label>Título *</label><input type="text" id="evt-titulo" placeholder="Ex: SIPAT 2026"></div>
+        <div class="form-group"><label>Tipo *</label>
+          <select id="evt-tipo">
+            <option value="feriado_nacional">🔴 Feriado Nacional</option>
+            <option value="feriado_estadual">🟠 Feriado Estadual/Municipal</option>
+            <option value="pagamento">🟢 Pagamento</option>
+            <option value="sipat">🔵 SIPAT</option>
+            <option value="ferias_coletivas">🟣 Férias Coletivas</option>
+            <option value="confraternizacao">🟡 Confraternização</option>
+            <option value="aniversariantes">🎂 Aniversariantes</option>
+            <option value="evento">⚫ Evento Personalizado</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Data início *</label><input type="date" id="evt-inicio"></div>
+        <div class="form-group"><label>Data fim</label><input type="date" id="evt-fim" placeholder="Se for mais de um dia"></div>
+      </div>
+      <div class="form-group"><label>Observação</label><input type="text" id="evt-obs" placeholder="Opcional"></div>
+      <div class="form-group">
+        <label><input type="checkbox" id="evt-recorrente" style="margin-right:6px">Repetir todo ano</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="btn-excluir-evt" style="display:none;margin-right:auto" onclick="excluirEvento()">🗑 Excluir</button>
+      <button class="btn" onclick="fecharModal('modal-evento-cal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEvento()">💾 Salvar</button>
+    </div>
+  </div>
 </div>
 
 <div class="page" id="page-config">
@@ -1835,6 +2067,8 @@ let DB = {
   pagamentos_pix:  safeArr('rh_pagamentos_pix'),
   usuarios:        safeArr('exp_usuarios'),
   vales:           safeArr('rh_vales'),
+  cal_eventos:     safeArr('cal_eventos'),
+  atestados:       safeArr('rh_atestados'),
 };
 // Empresas cadastradas
 const EMPRESAS = [
@@ -1921,7 +2155,7 @@ function showPage(id,btn){
   // Sincroniza bottom nav
   const bBtn=document.querySelector(`.bnav-btn[data-page="${id}"]`);
   if(bBtn)bBtn.classList.add('active');
-  const m={dashboard:renderDashboard,colaboradores:renderColabs,ferias:renderFerias,carreira:renderCarreira,advertencias:()=>{populateSelectColabs(['adv-colaborador']);renderAdvertencias();},aniversarios:renderAniversarios,desligamentos:()=>{populateSelectColabs(['desl-colaborador'],true);renderDesligamentos();},documentos:()=>{populateSelectColabs(['doc-filtro-colab','doc-colab']);renderDocumentos();},talentos:renderTalentos,pix:()=>{populateSelectColabs(['pix-colab','pix-filtro-colab']);renderPix();},pagamentos:renderPagePagamentos,config:carregarConfig};
+  const m={dashboard:renderDashboard,colaboradores:renderColabs,ferias:renderFerias,carreira:renderCarreira,advertencias:()=>{populateSelectColabs(['adv-colaborador']);renderAdvertencias();},atestados:()=>{populateSelectColabs(['at-colaborador']);renderAtestados();},aniversarios:renderAniversarios,desligamentos:()=>{populateSelectColabs(['desl-colaborador'],true);renderDesligamentos();},documentos:()=>{populateSelectColabs(['doc-filtro-colab','doc-colab']);renderDocumentos();},talentos:renderTalentos,pix:()=>{populateSelectColabs(['pix-colab','pix-filtro-colab']);renderPix();},pagamentos:renderPagePagamentos,config:carregarConfig,calendario:renderCalendario};
   if(m[id])m[id]();
 }
 
@@ -2097,14 +2331,14 @@ function renderColabs(lista){
   </tr>`;}).join('');
 }
 function filtrarColabs(){
-  const q=document.getElementById('busca-colab').value.toLowerCase();
+  const q=removerAcentos(document.getElementById('busca-colab').value).toLowerCase();
   const st=document.getElementById('filtro-status').value;
   const se=document.getElementById('filtro-setor-colab').value;
   const emp=document.getElementById('filtro-empresa-colab')?.value||'';
   const sx=document.getElementById('filtro-sexo-colab')?.value||'';
   const src=emp?DB.colaboradores:getColaboradoresFiltrados();
   renderColabs(src.filter(c=>
-    (!q||(c.nome||'').toLowerCase().includes(q)||c.cpf?.includes(q)||c.setor?.toLowerCase().includes(q))
+    (!q||removerAcentos(c.nome||'').toLowerCase().includes(q)||String(c.cpf||'').includes(q)||removerAcentos(c.setor||'').toLowerCase().includes(q))
     &&(!st||c.status===st)
     &&(!se||c.setor===se)
     &&(!emp||c.empresa===emp)
@@ -2301,11 +2535,11 @@ function renderFerias(lista){
   }).join(''):'<tr><td colspan="7" class="empty">Nenhum registro.</td></tr>';
 }
 function filtrarFerias(){
-  const q=document.getElementById('busca-ferias').value.toLowerCase();
+  const q=removerAcentos(document.getElementById('busca-ferias').value).toLowerCase();
   const ft=document.getElementById('filtro-ferias').value;
   const emp=document.getElementById('filtro-empresa-ferias')?.value||'';
   let src=calcularFeriasColab(emp);
-  if(q)src=src.filter(f=>(f.nome||'').toLowerCase().includes(q));
+  if(q)src=src.filter(f=>removerAcentos(f.nome||'').toLowerCase().includes(q));
   if(ft==='vencidas')src=src.filter(f=>f.diasRestantes<0);
   else if(ft==='critico')src=src.filter(f=>f.diasRestantes>=0&&f.diasRestantes<=30);
   else if(ft==='atencao')src=src.filter(f=>f.diasRestantes>30&&f.diasRestantes<=60);
@@ -2501,10 +2735,10 @@ function emitirAdvertencia(){
 
 function renderAdvertencias(){filtrarAdvertencias();}
 function filtrarAdvertencias(){
-  const q=document.getElementById('busca-adv').value.toLowerCase();
+  const q=removerAcentos(document.getElementById('busca-adv').value).toLowerCase();
   const emp=document.getElementById('filtro-empresa-adv')?.value||'';
   let lista=DB.advertencias;
-  if(q||emp)lista=lista.filter(a=>{const c=DB.colaboradores.find(x=>x.id==a.colaboradorId);return (!q||(c?.nome.toLowerCase().includes(q)||a.tipo.toLowerCase().includes(q)))&&(!emp||(c&&c.empresa===emp));});
+  if(q||emp)lista=lista.filter(a=>{const c=DB.colaboradores.find(x=>x.id==a.colaboradorId);return (!q||(removerAcentos(c?.nome||'').toLowerCase().includes(q)||removerAcentos(a.tipo||'').toLowerCase().includes(q)))&&(!emp||(c&&c.empresa===emp));});
   const el=document.getElementById('lista-advertencias');
   el.innerHTML=lista.length?[...lista].reverse().map(a=>{
     const c=DB.colaboradores.find(x=>x.id==a.colaboradorId);
@@ -2895,8 +3129,7 @@ async function sincronizarScript(action,data){
   }
 }
 async function sincronizar(){
-
-  setSyncStatus('loading','Sincronizando...');loading(true);
+  setSyncStatus('loading','Sincronizando...');
   try{
     const r=await fetch(SCRIPT_URL+'?action=listarTodos');
     const d=await r.json();
@@ -2920,6 +3153,11 @@ async function sincronizar(){
       }
       if(d.result.pagamentos_pix && Array.isArray(d.result.pagamentos_pix))DB.pagamentos_pix=d.result.pagamentos_pix;
       if(d.result.vales && Array.isArray(d.result.vales))DB.vales=d.result.vales;
+      if(d.result.cal_eventos&&Array.isArray(d.result.cal_eventos)&&d.result.cal_eventos.length){
+        DB.cal_eventos=d.result.cal_eventos;
+        localStorage.setItem('cal_eventos',JSON.stringify(d.result.cal_eventos));
+      }
+      if(d.result.atestados&&Array.isArray(d.result.atestados))DB.atestados=d.result.atestados;
       if(d.result.usuarios && Array.isArray(d.result.usuarios)&&d.result.usuarios.length){
         DB.usuarios=d.result.usuarios;
         localStorage.setItem('exp_usuarios',JSON.stringify(d.result.usuarios));
@@ -2943,7 +3181,6 @@ async function sincronizar(){
       }
     }else{setSyncStatus('offline','Erro: '+(d.error||'?'));notify(d.error||'Erro ao sincronizar','error');}
   }catch(e){setSyncStatus('offline','Erro de conexão');notify('Erro: '+e.message,'error');}
-  finally{loading(false);}
 }
 
 // ══════════════════════════════════════════
@@ -3143,11 +3380,11 @@ async function confirmarUploadDoc(){
 function renderDocumentos(){
   const cF=document.getElementById('doc-filtro-colab')?.value||'';
   const tF=document.getElementById('doc-filtro-tipo')?.value||'';
-  const bF=(document.getElementById('doc-busca')?.value||'').toLowerCase();
+  const bF=removerAcentos(document.getElementById('doc-busca')?.value||'').toLowerCase();
   let lista=DB.documentos;
   if(cF)lista=lista.filter(d=>d.colaboradorId==cF);
   if(tF)lista=lista.filter(d=>d.tipo===tF);
-  if(bF)lista=lista.filter(d=>(d.nome+d.descricao+d.colaboradorNome).toLowerCase().includes(bF));
+  if(bF)lista=lista.filter(d=>removerAcentos(d.nome+d.descricao+d.colaboradorNome).toLowerCase().includes(bF));
   // KPIs
   document.getElementById('doc-kpi-total').textContent=DB.documentos.length;
   document.getElementById('doc-kpi-atestados').textContent=DB.documentos.filter(d=>d.tipo==='Atestado Médico').length;
@@ -3321,11 +3558,11 @@ async function _uploadTalentoBackground(obj){
 }
 
 function renderTalentos(){
-  const busca=(document.getElementById('tal-busca')?.value||'').toLowerCase();
+  const busca=removerAcentos(document.getElementById('tal-busca')?.value||'').toLowerCase();
   const sexoF=document.getElementById('tal-filtro-sexo')?.value||'';
   const setorF=document.getElementById('tal-filtro-setor')?.value||'';
   let lista=[...DB.talentos];
-  if(busca)lista=lista.filter(t=>(t.nome||'').toLowerCase().includes(busca)||(t.email||'').toLowerCase().includes(busca));
+  if(busca)lista=lista.filter(t=>removerAcentos(t.nome||'').toLowerCase().includes(busca)||removerAcentos(t.email||'').toLowerCase().includes(busca));
   if(sexoF)lista=lista.filter(t=>t.sexo===sexoF);
   if(setorF)lista=lista.filter(t=>{
     let s=t.setores||[];
@@ -6327,6 +6564,11 @@ window.addEventListener('DOMContentLoaded',()=>{
           if(r.talentos&&Array.isArray(r.talentos))DB.talentos=r.talentos;
           if(r.pagamentos_pix&&Array.isArray(r.pagamentos_pix))DB.pagamentos_pix=r.pagamentos_pix;
           if(r.vales&&Array.isArray(r.vales))DB.vales=r.vales;
+          if(r.cal_eventos&&Array.isArray(r.cal_eventos)&&r.cal_eventos.length){
+            DB.cal_eventos=r.cal_eventos;
+            localStorage.setItem('cal_eventos',JSON.stringify(r.cal_eventos));
+          }
+          if(r.atestados&&Array.isArray(r.atestados))DB.atestados=r.atestados;
           if(r.usuarios&&Array.isArray(r.usuarios)&&r.usuarios.length){
             DB.usuarios=r.usuarios;
             localStorage.setItem('exp_usuarios',JSON.stringify(r.usuarios));
@@ -7210,7 +7452,7 @@ function registrarLog(action,status){
 function renderLog(){
   var logs=[];
   try{logs=JSON.parse(localStorage.getItem('exp_log')||'[]');}catch(e){}
-  var q=(document.getElementById('log-busca')?.value||'').toLowerCase();
+  var q=removerAcentos(document.getElementById('log-busca')?.value||'').toLowerCase();
   if(q)logs=logs.filter(function(l){return (l.action+l.status+l.usuario).toLowerCase().includes(q);});
   var el=document.getElementById('log-lista');
   if(!el)return;
@@ -7249,12 +7491,12 @@ function executarBuscaGlobal(q){
     el.innerHTML='<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Digite ao menos 2 caracteres...</div>';
     return;
   }
-  var ql=q.toLowerCase();
+  var ql=removerAcentos(q).toLowerCase();
   var colabs=(DB.colaboradores||[]).filter(function(c){
-    return (c.nome||'').toLowerCase().includes(ql)
-      ||(c.cpf||'').replace(/\D/g,'').includes(ql)
-      ||(c.cargo||'').toLowerCase().includes(ql)
-      ||(c.setor||'').toLowerCase().includes(ql)
+    return removerAcentos(c.nome||'').toLowerCase().includes(ql)
+      ||String(c.cpf||'').replace(/\D/g,'').includes(ql)
+      ||removerAcentos(c.cargo||'').toLowerCase().includes(ql)
+      ||removerAcentos(c.setor||'').toLowerCase().includes(ql)
       ||(c.email||'').toLowerCase().includes(ql);
   }).slice(0,12);
 
@@ -7859,6 +8101,945 @@ function carregarXLSDia30(input){
     document.head.appendChild(s);
   }
 }
+
+// ══════════════════════════════════════════════════════════
+// ATESTADOS MÉDICOS
+// ══════════════════════════════════════════════════════════
+
+// Dicionário simplificado dos CIDs mais comuns em ambiente de trabalho
+var CID_DESC = {
+  'J06':'Infecção aguda das vias aéreas superiores','J06.9':'Infecção aguda das vias aéreas superiores não especificada',
+  'J00':'Rinofaringite aguda (resfriado comum)','J02':'Faringite aguda','J03':'Amigdalite aguda',
+  'J11':'Influenza (gripe)','J18':'Pneumonia não especificada','K21':'Doença do refluxo gastroesofágico',
+  'K59':'Outros transtornos funcionais do intestino','K29':'Gastrite e duodenite',
+  'M54':'Dorsalgia','M54.5':'Dor lombar baixa','M54.4':'Lumbago com ciática',
+  'G43':'Enxaqueca','G44':'Outras síndromes de algias cefálicas','R51':'Cefaleia',
+  'A09':'Diarreia e gastroenterite de origem infecciosa presumível',
+  'N39':'Outros transtornos do trato urinário','N23':'Cólica renal não especificada',
+  'L30':'Outras dermatites','Z76':'Contato com serviços de saúde','K57':'Doença diverticular do intestino',
+  'F32':'Episódios depressivos','F41':'Outros transtornos ansiosos','F43':'Reação ao stress',
+  'S00':'Traumatismo superficial da cabeça','S60':'Traumatismo superficial do punho e mão',
+  'T14':'Traumatismo de região não especificada do corpo',
+  'O26':'Assistência à mãe por outros problemas ligados à gravidez',
+};
+
+function buscarCID(cid) {
+  var el = document.getElementById('at-cid-desc');
+  if (!el) return;
+  if (!cid || cid.length < 2) { el.textContent = ''; return; }
+  // Busca exata ou por prefixo
+  var desc = CID_DESC[cid] || CID_DESC[cid.split('.')[0]] || '';
+  el.textContent = desc ? '📋 ' + desc : '';
+}
+
+function toggleAfastamentoAtestado() {
+  var info = document.getElementById('at-afasta-info');
+  if (info) info.style.display = document.getElementById('at-afasta').checked ? 'block' : 'none';
+}
+
+function limparFormAtestado() {
+  ['at-colaborador','at-tipo','at-hora-chegada','at-hora-saida'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['at-data','at-dias','at-cid','at-medico','at-obs'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('at-cid-desc').textContent = '';
+  document.getElementById('at-afasta').checked = false;
+  document.getElementById('at-afasta-info').style.display = 'none';
+}
+
+function salvarAtestado() {
+  var colabId = document.getElementById('at-colaborador').value;
+  var data    = document.getElementById('at-data').value;
+  var dias    = parseInt(document.getElementById('at-dias').value) || 0;
+  if (!colabId) { notify('Selecione o colaborador', 'error'); return; }
+  if (!data)    { notify('Informe a data do atestado', 'error'); return; }
+  if (!dias)    { notify('Informe os dias afastados', 'error'); return; }
+
+  var colab = DB.colaboradores.find(function(c) { return String(c.id) === String(colabId); });
+  var cid   = document.getElementById('at-cid').value.trim().toUpperCase();
+
+  var obj = {
+    id:             gerarId(),
+    colaboradorId:  String(colabId),
+    colaboradorNome: colab ? colab.nome : '',
+    empresa:        colab ? colab.empresa || '' : '',
+    data:           data,
+    dias:           dias,
+    tipo:           document.getElementById('at-tipo').value,
+    cid:            cid,
+    cidDescricao:   CID_DESC[cid] || CID_DESC[cid.split('.')[0]] || '',
+    medico:         document.getElementById('at-medico').value.trim(),
+    horaChegada:    document.getElementById('at-hora-chegada').value,
+    horaSaida:      document.getElementById('at-hora-saida').value,
+    obs:            document.getElementById('at-obs').value.trim(),
+    afasta:         document.getElementById('at-afasta').checked,
+    registradoEm:   new Date().toISOString(),
+  };
+
+  if (!DB.atestados) DB.atestados = [];
+  DB.atestados.push(obj);
+  salvarDB();
+  sincronizarScript('novoAtestado', obj);
+
+  // Se marcou para afastar, altera status do colaborador
+  if (obj.afasta) {
+    var idx = DB.colaboradores.findIndex(function(c) { return String(c.id) === String(colabId); });
+    if (idx >= 0) {
+      DB.colaboradores[idx].status = 'Afastado';
+      salvarDB();
+      sincronizarScript('editarColaborador', DB.colaboradores[idx]);
+      notify('Colaborador ' + obj.colaboradorNome + ' marcado como Afastado.');
+    }
+  }
+
+  limparFormAtestado();
+  renderAtestados();
+  notify('✅ Atestado de ' + obj.colaboradorNome + ' registrado! (' + dias + ' dia(s))');
+}
+
+function renderAtestados() {
+  var lista = DB.atestados || [];
+  var q     = removerAcentos(document.getElementById('at-busca')?.value || '').toLowerCase();
+  var emp   = document.getElementById('at-filtro-empresa')?.value || '';
+  var ano   = document.getElementById('at-filtro-ano')?.value || '';
+  var tipo  = document.getElementById('at-filtro-tipo')?.value || '';
+
+  // Popula filtro de anos
+  var selAno = document.getElementById('at-filtro-ano');
+  if (selAno && selAno.options.length <= 1) {
+    var anos = [...new Set((lista).map(function(a) { return (a.data||'').split('-')[0]; }).filter(Boolean))].sort().reverse();
+    var anoAtual = String(new Date().getFullYear());
+    if (!anos.includes(anoAtual)) anos.unshift(anoAtual);
+    selAno.innerHTML = '<option value="">Todos os anos</option>' +
+      anos.map(function(a) { return '<option value="'+a+'"'+(a===anoAtual?' selected':'')+'>'+a+'</option>'; }).join('');
+    ano = anoAtual;
+  }
+
+  var filtrado = lista.filter(function(a) {
+    if (q   && !removerAcentos(a.colaboradorNome||'').toLowerCase().includes(q)) return false;
+    if (emp && a.empresa !== emp) return false;
+    if (ano && !(a.data||'').startsWith(ano)) return false;
+    if (tipo && a.tipo !== tipo) return false;
+    return true;
+  }).sort(function(a,b){ return (b.data||'').localeCompare(a.data||''); });
+
+  // KPIs
+  var anoKpi = ano || String(new Date().getFullYear());
+  var listaAno = lista.filter(function(a){ return (a.data||'').startsWith(anoKpi); });
+  document.getElementById('at-kpi-total').textContent  = listaAno.length;
+  document.getElementById('at-kpi-dias').textContent   = listaAno.reduce(function(s,a){ return s+(parseInt(a.dias)||0); }, 0);
+  document.getElementById('at-kpi-colab').textContent  = new Set(listaAno.map(function(a){ return a.colaboradorId; })).size;
+
+  var el = document.getElementById('lista-atestados');
+  if (!filtrado.length) { el.innerHTML = '<div class="empty">Nenhum atestado encontrado.</div>'; return; }
+
+  var TIPO_COR = {
+    'Atestado Médico':               '#2563eb',
+    'Atestado Odontológico':         '#0891b2',
+    'Declaração de Comparecimento':  '#059669',
+    'Afastamento INSS':              '#dc2626',
+    'Licença Maternidade':           '#db2777',
+    'Licença Paternidade':           '#7c3aed',
+    'Acompanhante (dependente)':     '#d97706',
+    'Outro':                         '#6b7280',
+  };
+
+  el.innerHTML = filtrado.map(function(a, i) {
+    var cor = TIPO_COR[a.tipo] || '#6b7280';
+    var bg  = i % 2 === 0 ? 'var(--surface)' : 'var(--surface2)';
+    return '<div style="padding:10px 12px;border-bottom:1px solid var(--border);background:'+bg+';display:flex;gap:10px;align-items:flex-start">'
+      // Barra lateral colorida por tipo
+      + '<div style="width:4px;border-radius:2px;background:'+cor+';flex-shrink:0;min-height:40px"></div>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">'
+          + '<span style="font-size:13px;font-weight:700">'+a.colaboradorNome+'</span>'
+          + '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:'+cor+'22;color:'+cor+'">'+a.tipo+'</span>'
+          + (a.afasta?'<span style="font-size:10px;background:#fee2e2;color:#b91c1c;padding:2px 6px;border-radius:99px;font-weight:700">Afastado</span>':'')
+        + '</div>'
+        + '<div style="font-size:12px;color:var(--text2);display:flex;gap:12px;flex-wrap:wrap">'
+          + '<span>📅 '+fmtData(a.data)+'</span>'
+          + '<span>⏱ <b>'+a.dias+'</b> dia(s)</span>'
+          + (a.cid?'<span title="'+(a.cidDescricao||'')+'">🔬 '+a.cid+(a.cidDescricao?' — '+a.cidDescricao.slice(0,30)+(a.cidDescricao.length>30?'...':''):'')+'</span>':'')
+          + (a.medico?'<span>👨‍⚕️ '+a.medico+'</span>':'')
+          + (a.horaChegada?'<span>🕐 Chegou: '+a.horaChegada+'</span>':'')
+          + (a.horaSaida?'<span>🕐 Saiu: '+a.horaSaida+'</span>':'')
+        + '</div>'
+        + (a.obs?'<div style="font-size:11px;color:var(--text3);margin-top:3px">'+a.obs+'</div>':'')
+      + '</div>'
+      + '<button onclick="excluirAtestado(\''+a.id+'\')" class="btn btn-sm btn-danger" style="flex-shrink:0" title="Excluir">🗑</button>'
+      + '</div>';
+  }).join('');
+}
+
+function excluirAtestado(id) {
+  if (!confirm('Excluir este atestado?')) return;
+  DB.atestados = (DB.atestados||[]).filter(function(a){ return a.id !== id; });
+  salvarDB();
+  sincronizarScript('excluirAtestado', { id: id });
+  renderAtestados();
+  notify('Atestado excluído');
+}
+
+function gerarRelatorioAtestados() {
+  var lista    = DB.atestados || [];
+  var q        = removerAcentos(document.getElementById('at-busca')?.value||'').toLowerCase();
+  var emp      = document.getElementById('at-filtro-empresa')?.value||'';
+  var ano      = document.getElementById('at-filtro-ano')?.value||String(new Date().getFullYear());
+  var tipo     = document.getElementById('at-filtro-tipo')?.value||'';
+
+  var filtrado = lista.filter(function(a){
+    if(q   && !removerAcentos(a.colaboradorNome||'').toLowerCase().includes(q))return false;
+    if(emp && a.empresa!==emp)return false;
+    if(ano && !(a.data||'').startsWith(ano))return false;
+    if(tipo && a.tipo!==tipo)return false;
+    return true;
+  }).sort(function(a,b){return(a.colaboradorNome||'').localeCompare(b.colaboradorNome||'','pt-BR')||(a.data||'').localeCompare(b.data||'');});
+
+  if(!filtrado.length){notify('Nenhum atestado para gerar relatório','warn');return;}
+
+  // Agrupa por colaborador
+  var porColab={};
+  filtrado.forEach(function(a){
+    var k=a.colaboradorId||a.colaboradorNome;
+    if(!porColab[k])porColab[k]={nome:a.colaboradorNome,empresa:a.empresa,atestados:[],totalDias:0};
+    porColab[k].atestados.push(a);
+    porColab[k].totalDias+=parseInt(a.dias)||0;
+  });
+
+  var totalGeral=filtrado.reduce(function(s,a){return s+(parseInt(a.dias)||0);},0);
+  var tituloFiltro=[(emp||'Todas as Empresas'),(ano||'Todos os anos'),(tipo||'Todos os tipos')].filter(Boolean).join(' · ');
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório de Atestados</title><style>';
+  html+='*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11px;padding:16px;color:#1a1a1a}';
+  html+='table{width:100%;border-collapse:collapse;margin-bottom:12px}th,td{padding:5px 8px;border-bottom:1px solid #e2e8f0;text-align:left}';
+  html+='th{background:#1a5c38;color:#fff;font-weight:700}.colab-header{background:#f0fdf4;font-weight:700;color:#1a5c38}';
+  html+='.total-row{background:#1a5c38;color:#fff;font-weight:700}';
+  html+='@page{margin:10mm;size:A4 portrait}@media print{body{padding:0}}';
+  html+='<\/style></head><body>';
+
+  // Cabeçalho
+  html+='<div style="border-bottom:3px solid #1a5c38;padding-bottom:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-end">';
+  html+='<div><div style="font-size:18px;font-weight:900;color:#1a5c38">Relatório de Atestados Médicos</div>';
+  html+='<div style="font-size:11px;color:#666;margin-top:2px">'+tituloFiltro+'</div></div>';
+  html+='<div style="text-align:right;font-size:10px;color:#888">Gerado em '+new Date().toLocaleDateString('pt-BR')+'<br>Explosão Alimentos · Exp Pessoas</div>';
+  html+='</div>';
+
+  // Resumo executivo
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">';
+  var cols=[
+    {label:'Total Atestados',val:filtrado.length,cor:'#2563eb'},
+    {label:'Dias Perdidos',val:totalGeral,cor:'#dc2626'},
+    {label:'Colaboradores',val:Object.keys(porColab).length,cor:'#7c3aed'},
+    {label:'Média dias/atestado',val:(totalGeral/filtrado.length).toFixed(1),cor:'#d97706'},
+  ];
+  cols.forEach(function(c){
+    html+='<div style="border:1px solid #e2e8f0;border-top:3px solid '+c.cor+';border-radius:4px;padding:8px;text-align:center">';
+    html+='<div style="font-size:20px;font-weight:900;color:'+c.cor+'">'+c.val+'</div>';
+    html+='<div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.3px">'+c.label+'</div></div>';
+  });
+  html+='</div>';
+
+  // Tabela por colaborador
+  html+='<div style="font-size:11px;font-weight:700;color:#1a5c38;border-bottom:1px solid #1a5c38;padding-bottom:3px;margin-bottom:8px">DETALHAMENTO POR COLABORADOR</div>';
+  html+='<table><thead><tr><th>Data</th><th>Tipo</th><th>CID</th><th>Dias</th><th>Médico</th><th>Obs</th></tr></thead><tbody>';
+
+  Object.values(porColab).forEach(function(g){
+    html+='<tr class="colab-header"><td colspan="5">👤 '+g.nome+' — '+g.empresa+'</td><td style="text-align:right;color:#1a5c38">'+g.totalDias+'d total</td></tr>';
+    g.atestados.forEach(function(a){
+      html+='<tr>'
+        +'<td>'+fmtData(a.data)+'</td>'
+        +'<td>'+a.tipo+'</td>'
+        +'<td title="'+(a.cidDescricao||'')+'">'+( a.cid||(a.cidDescricao?a.cidDescricao.slice(0,20):'—'))+'</td>'
+        +'<td style="text-align:center;font-weight:700;color:#dc2626">'+a.dias+'</td>'
+        +'<td>'+(a.medico||'—')+'</td>'
+        +'<td style="color:#888">'+(a.obs||'')+'</td>'
+        +'</tr>';
+    });
+  });
+
+  html+='<tr class="total-row"><td colspan="3">TOTAL GERAL — '+filtrado.length+' atestado(s)</td><td style="text-align:center">'+totalGeral+'d</td><td colspan="2"></td></tr>';
+  html+='</tbody></table>';
+
+  // Ranking por colaborador (mais atestados)
+  var ranking=Object.values(porColab).sort(function(a,b){return b.totalDias-a.totalDias;}).slice(0,10);
+  if(ranking.length>1){
+    html+='<div style="font-size:11px;font-weight:700;color:#1a5c38;border-bottom:1px solid #1a5c38;padding-bottom:3px;margin:12px 0 8px">RANKING — DIAS AFASTADOS ('+ano+')</div>';
+    html+='<table><thead><tr><th>#</th><th>Colaborador</th><th>Empresa</th><th style="text-align:center">Atestados</th><th style="text-align:center">Dias</th></tr></thead><tbody>';
+    ranking.forEach(function(g,i){
+      html+='<tr><td style="font-weight:700;color:#1a5c38">'+(i+1)+'º</td><td>'+g.nome+'</td><td>'+g.empresa+'</td><td style="text-align:center">'+g.atestados.length+'</td><td style="text-align:center;font-weight:700;color:#dc2626">'+g.totalDias+'</td></tr>';
+    });
+    html+='</tbody></table>';
+  }
+
+  html+='</body></html>';
+  var j=window.open('','_blank');j.document.write(html);j.document.close();setTimeout(function(){j.print();},500);
+}
+
+var _calAnoAtual=new Date().getFullYear();
+var _calMesAtual=new Date().getMonth();
+var _calTabAtual='anual';
+
+var CAL_TIPOS={
+  feriado_nacional: {label:'Feriado Nacional',  cor:'#dc2626',bg:'#fee2e2',icon:'🔴'},
+  feriado_estadual: {label:'Feriado Est./Mun.', cor:'#ea580c',bg:'#ffedd5',icon:'🟠'},
+  pagamento:        {label:'Pagamento',          cor:'#16a34a',bg:'#dcfce7',icon:'🟢'},
+  sipat:            {label:'SIPAT',              cor:'#2563eb',bg:'#dbeafe',icon:'🔵'},
+  ferias_coletivas: {label:'Férias Coletivas',   cor:'#7c3aed',bg:'#ede9fe',icon:'🟣'},
+  confraternizacao: {label:'Confraternização',   cor:'#d97706',bg:'#fef3c7',icon:'🟡'},
+  aniversariantes:  {label:'Aniversariantes',    cor:'#db2777',bg:'#fce7f3',icon:'🎂'},
+  evento:           {label:'Evento',             cor:'#374151',bg:'#f3f4f6',icon:'⚫'},
+};
+
+// ══════════════════════════════════════════════════════════════════
+// SISTEMA DE FERIADOS — automático para qualquer ano, sem APIs externas
+// ══════════════════════════════════════════════════════════════════
+
+/**
+ * Calcula a data da Páscoa para qualquer ano usando o algoritmo
+ * Meeus-Jones-Butcher (Computus Gregoriano).
+ * Fonte: Jean Meeus, "Astronomical Algorithms", 1991.
+ * Funciona corretamente para qualquer ano >= 1583.
+ *
+ * @param {number} ano - Ano com 4 dígitos (ex: 2026)
+ * @returns {Date} - Data da Páscoa (Domingo)
+ */
+function calcularPascoa(ano) {
+  // Passo 1: resto da divisão do ano por 19 (ciclo de Metão)
+  var a = ano % 19;
+  // Passo 2: século e posição dentro do século
+  var b = Math.floor(ano / 100);
+  var c = ano % 100;
+  // Passo 3: correções do calendário gregoriano
+  var d = Math.floor(b / 4);
+  var e = b % 4;
+  var f = Math.floor((b + 8) / 25);
+  var g = Math.floor((b - f + 1) / 3);
+  // Passo 4: epacta (diferença entre sol e lua)
+  var h = (19 * a + b - d - g + 15) % 30;
+  // Passo 5: ajuste para o calendário juliano/gregoriano
+  var i = Math.floor(c / 4);
+  var k = c % 4;
+  var l = (32 + 2 * e + 2 * i - h - k) % 7;
+  // Passo 6: correção final do mês
+  var m = Math.floor((a + 11 * h + 22 * l) / 451);
+  // Passo 7: calcula mês e dia da Páscoa
+  var mes = Math.floor((h + l - 7 * m + 114) / 31); // 3=março, 4=abril
+  var dia = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(ano, mes - 1, dia);
+}
+
+/**
+ * Adiciona dias a uma data retornando uma nova Date.
+ * Usado para calcular feriados móveis a partir da Páscoa.
+ *
+ * @param {Date} data - Data base
+ * @param {number} dias - Número de dias (positivo ou negativo)
+ * @returns {Date}
+ */
+function somarDias(data, dias) {
+  return new Date(data.getTime() + dias * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * Gera todos os feriados nacionais do Brasil para um determinado ano.
+ * Funciona automaticamente para qualquer ano sem necessidade de atualização manual.
+ *
+ * Feriados fixos: cadastrados por data (dia/mês), aplicados ao ano solicitado.
+ * Feriados móveis: calculados dinamicamente a partir da data da Páscoa.
+ *
+ * @param {number} ano - Ano com 4 dígitos
+ * @returns {Array} - Array de objetos com: { nome, data, tipo, movel }
+ *   - nome    {string}  Nome do feriado
+ *   - data    {Date}    Data do feriado
+ *   - tipo    {string}  'feriado_nacional' | 'feriado_estadual' | 'ponto_facultativo'
+ *   - movel   {boolean} true = data móvel (baseada na Páscoa), false = data fixa
+ */
+function gerarFeriados(ano) {
+  var feriados = [];
+
+  // ── FERIADOS DE DATA FIXA ─────────────────────────────────────────
+  // Datas que nunca mudam, independente do ano.
+  // Basta informar dia e mês; o ano é aplicado dinamicamente.
+  var fixos = [
+    { nome: 'Confraternização Universal',  mes: 1,  dia: 1,  tipo: 'feriado_nacional' },
+    { nome: 'Tiradentes',                  mes: 4,  dia: 21, tipo: 'feriado_nacional' },
+    { nome: 'Dia do Trabalho',             mes: 5,  dia: 1,  tipo: 'feriado_nacional' },
+    { nome: 'Independência do Brasil',     mes: 9,  dia: 7,  tipo: 'feriado_nacional' },
+    { nome: 'Nossa Senhora Aparecida',     mes: 10, dia: 12, tipo: 'feriado_nacional' },
+    { nome: 'Finados',                     mes: 11, dia: 2,  tipo: 'feriado_nacional' },
+    { nome: 'Proclamação da República',    mes: 11, dia: 15, tipo: 'feriado_nacional' },
+    { nome: 'Consciência Negra',           mes: 11, dia: 20, tipo: 'feriado_nacional' },
+    { nome: 'Natal',                       mes: 12, dia: 25, tipo: 'feriado_nacional' },
+    // Feriados estaduais/municipais
+    { nome: 'Fundação da Cidade de Goiás', mes: 7,  dia: 26, tipo: 'feriado_estadual' },
+    { nome: 'Aniversário de Trindade',     mes: 8,  dia: 31, tipo: 'feriado_estadual' },
+  ];
+
+  fixos.forEach(function(f) {
+    feriados.push({
+      nome:  f.nome,
+      data:  new Date(ano, f.mes - 1, f.dia),
+      tipo:  f.tipo,
+      movel: false // data fixa
+    });
+  });
+
+  // ── FERIADOS MÓVEIS ───────────────────────────────────────────────
+  // Calculados dinamicamente a partir da Páscoa.
+  // NÃO devem ser cadastrados manualmente — calculados para cada ano.
+  var pascoa = calcularPascoa(ano);
+
+  var moveis = [
+    // Carnaval: não é feriado nacional oficial, mas é ponto facultativo
+    { nome: 'Segunda-feira de Carnaval', dias: -48, tipo: 'ponto_facultativo' },
+    { nome: 'Terça-feira de Carnaval',   dias: -47, tipo: 'ponto_facultativo' },
+    { nome: 'Quarta-feira de Cinzas',    dias: -46, tipo: 'ponto_facultativo' },
+    // Semana Santa
+    { nome: 'Sexta-feira Santa',         dias: -2,  tipo: 'feriado_nacional'  },
+    { nome: 'Páscoa',                    dias:  0,  tipo: 'feriado_nacional'  },
+    // Corpus Christi: ponto facultativo federal, mas muitos estados adotam
+    { nome: 'Corpus Christi',            dias: 60,  tipo: 'ponto_facultativo' },
+  ];
+
+  moveis.forEach(function(f) {
+    feriados.push({
+      nome:  f.nome,
+      data:  somarDias(pascoa, f.dias),
+      tipo:  f.tipo,
+      movel: true // data móvel baseada na Páscoa
+    });
+  });
+
+  // Ordena por data crescente
+  feriados.sort(function(a, b) { return a.data - b.data; });
+
+  return feriados;
+}
+
+// ── MAPEAMENTO para o sistema de calendário ──────────────────────────
+// Converte o array de gerarFeriados() para o formato interno do calendário.
+// Chamado por getEventosCalendario(ano) a cada renderização.
+function feriadosComoEventos(ano) {
+  return gerarFeriados(ano).map(function(f) {
+    // Ponto facultativo usa o mesmo tipo visual de feriado nacional
+    // mas pode ser diferenciado futuramente via f.tipo
+    var tipoVisual = f.tipo === 'feriado_estadual' ? 'feriado_estadual' : 'feriado_nacional';
+    return {
+      id:    'frd_' + ano + '_' + f.nome.replace(/\s+/g,'_'),
+      titulo: f.nome + (f.tipo === 'ponto_facultativo' ? ' ★' : ''),
+      tipo:  tipoVisual,
+      inicio: fmtDateKey(f.data),
+      fim:   fmtDateKey(f.data),
+      fixo:  true,
+      movel: f.movel
+    };
+  });
+}
+
+function fmtDateKey(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function ultimaSexta(ano,mes){
+  var ultimo=new Date(ano,mes+1,0);
+  var dow=ultimo.getDay();
+  var diff=dow>=5?dow-5:dow+2;
+  return new Date(ano,mes,ultimo.getDate()-diff);
+}
+
+function getEventosUsuario(){
+  // Prioriza DB (carregado do Sheets), fallback localStorage
+  if(DB.cal_eventos&&DB.cal_eventos.length)return DB.cal_eventos;
+  try{return JSON.parse(localStorage.getItem('cal_eventos')||'[]');}catch(e){return[];}
+}
+function salvarEventosUsuario(lista){
+  DB.cal_eventos=lista;
+  localStorage.setItem('cal_eventos',JSON.stringify(lista));
+  // Sincroniza com Sheets
+  sincronizarScript('salvarCalEventos',lista);
+}
+
+function getEventosCalendario(ano){
+  var eventos=[];
+
+  // ── Feriados nacionais e estaduais (calculados automaticamente) ──
+  feriadosComoEventos(ano).forEach(function(e){ eventos.push(e); });
+
+  // ── Aniversários individuais — no dia exato de cada colaborador ──
+  (DB.colaboradores||[]).forEach(function(c){
+    if(!c.nascimento||c.status==='Desligado')return;
+    var nd=normalizarData(c.nascimento);
+    if(!nd)return;
+    var partes=nd.split('-');
+    var mesNasc=parseInt(partes[1])-1; // 0-indexed
+    var diaNasc=parseInt(partes[2]);
+    if(isNaN(mesNasc)||isNaN(diaNasc))return;
+    var dtAniv=new Date(ano,mesNasc,diaNasc);
+    var idadeAnos=ano-parseInt(partes[0]);
+    eventos.push({
+      id:'aniv_'+c.id+'_'+ano,
+      titulo:'🎂 Aniversário: '+c.nome.split(' ')[0]+' ('+idadeAnos+' anos)',
+      tipo:'aniversariantes',
+      inicio:fmtDateKey(dtAniv),
+      fim:fmtDateKey(dtAniv),
+      fixo:true
+    });
+  });
+
+  // ── Comemoração coletiva — última sexta de cada mês ──────────────
+  for(var m=0;m<12;m++){
+    var us=ultimaSexta(ano,m);
+    // Lista de aniversariantes do mês
+    var bdayers=(DB.colaboradores||[]).filter(function(c){
+      if(!c.nascimento||c.status==='Desligado')return false;
+      var nd=normalizarData(c.nascimento);
+      if(!nd)return false;
+      return parseInt(nd.split('-')[1])===(m+1);
+    }).map(function(c){return c.nome.split(' ')[0];});
+    if(!bdayers.length)continue; // sem aniversariantes no mês, não cria o evento
+    eventos.push({
+      id:'bday_'+ano+'_'+m,
+      titulo:'🎉 Comemoração Aniversariantes ('+bdayers.length+')',
+      tipo:'aniversariantes',
+      inicio:fmtDateKey(us),
+      fim:fmtDateKey(us),
+      obs:bdayers.join(', '),
+      fixo:true
+    });
+  }
+
+  // ── Pagamentos (com antecipação automática se cair em fim de semana) ──
+  var configPag=getConfigPagamentos(ano);
+  for(var m2=0;m2<12;m2++){
+    var cfg=configPag[m2];
+    // Dia 15
+    if(cfg.ativo15){
+      var d15=cfg.data15?new Date(cfg.data15+'T00:00'):anteciparParaDiaUtil(new Date(ano,m2,15));
+      eventos.push({id:'p15_'+ano+'_'+m2,titulo:'💰 Pagamento — Adiantamento ('+d15.getDate()+'/'+( d15.getMonth()+1)+')',tipo:'pagamento',inicio:fmtDateKey(d15),fim:fmtDateKey(d15),fixo:true});
+    }
+    // Dia 30/fim do mês
+    if(cfg.ativo30){
+      var dUlt=cfg.data30?new Date(cfg.data30+'T00:00'):anteciparParaDiaUtil(new Date(ano,m2+1,0));
+      eventos.push({id:'p30_'+ano+'_'+m2,titulo:'💰 Pagamento — Folha ('+dUlt.getDate()+'/'+( dUlt.getMonth()+1)+')',tipo:'pagamento',inicio:fmtDateKey(dUlt),fim:fmtDateKey(dUlt),fixo:true});
+    }
+  }
+
+  // ── Eventos cadastrados pelo usuário ────────────────────────────
+  getEventosUsuario().forEach(function(e){
+    if(e.recorrente){
+      var ini=e.inicio.replace(/^\d{4}/,String(ano));
+      var fim=(e.fim||e.inicio).replace(/^\d{4}/,String(ano));
+      eventos.push(Object.assign({},e,{inicio:ini,fim:fim}));
+    } else if(parseInt(e.inicio)===ano){
+      eventos.push(e);
+    }
+  });
+
+  // ── Férias individuais (operacional) ────────────────────────────
+  (DB.ferias_gozo||[]).forEach(function(f){
+    if(!f.inicio||parseInt(f.inicio)!==ano)return;
+    var c=DB.colaboradores.find(function(x){return String(x.id)===String(f.colaboradorId);});
+    eventos.push({id:'fer_'+f.id,titulo:'🏖️ Férias: '+(c?c.nome:'?'),tipo:'evento',inicio:f.inicio,fim:f.fim||f.inicio,fixo:true,operacional:true});
+  });
+
+  return eventos;
+}
+
+function getEventosDia(ano,mes,dia,eventos){
+  var key=fmtDateKey(new Date(ano,mes,dia));
+  return eventos.filter(function(e){return e.inicio<=key&&(e.fim||e.inicio)>=key;});
+}
+
+// ══════════════════════════════════════════════════════════
+// CONFIGURAÇÃO DE PAGAMENTOS DO CALENDÁRIO
+// ══════════════════════════════════════════════════════════
+
+/**
+ * Antecipa uma data para o dia útil anterior se cair em sábado (sáb→sex) ou domingo (dom→sex).
+ * @param {Date} data
+ * @returns {Date}
+ */
+function anteciparParaDiaUtil(data) {
+  var d = new Date(data);
+  var dow = d.getDay(); // 0=dom, 6=sáb
+  if (dow === 6) d.setDate(d.getDate() - 1); // sábado → sexta
+  if (dow === 0) d.setDate(d.getDate() - 2); // domingo → sexta
+  return d;
+}
+
+/**
+ * Retorna a config de pagamentos para o ano.
+ * Estrutura: array[12] — um objeto por mês com:
+ *   { ativo15, data15, ativo30, data30 }
+ *   data15/data30: null = automático (com antecipação), string YYYY-MM-DD = manual
+ */
+function getConfigPagamentos(ano) {
+  var chave = 'cal_pag_' + ano;
+  try {
+    var salvo = JSON.parse(localStorage.getItem(chave) || 'null');
+    if (salvo && salvo.length === 12) return salvo;
+  } catch(e) {}
+  // Padrão: todos ativos, datas automáticas
+  var cfg = [];
+  for (var m = 0; m < 12; m++) {
+    cfg.push({ ativo15: true, data15: null, ativo30: true, data30: null });
+  }
+  return cfg;
+}
+
+function salvarConfigPagamentosLocal(ano, cfg) {
+  localStorage.setItem('cal_pag_' + ano, JSON.stringify(cfg));
+}
+
+function renderTabPagamentos() {
+  var ano = _calAnoAtual;
+  var cfg = getConfigPagamentos(ano);
+  var nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var el = document.getElementById('cal-pag-tabela');
+  if (!el) return;
+
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html += '<thead><tr style="background:#1a5c38;color:#fff">'
+    + '<th style="padding:8px 10px;text-align:left">Mês</th>'
+    + '<th style="padding:8px 10px;text-align:center">Adiantamento (Dia 15)</th>'
+    + '<th style="padding:8px 10px;text-align:center">Folha (Fim do mês)</th>'
+    + '</tr></thead><tbody>';
+
+  for (var m = 0; m < 12; m++) {
+    var c = cfg[m];
+    // Datas automáticas calculadas
+    var autoD15 = anteciparParaDiaUtil(new Date(ano, m, 15));
+    var autoD30 = anteciparParaDiaUtil(new Date(ano, m + 1, 0));
+    var bg = m % 2 === 0 ? 'var(--surface)' : 'var(--surface2)';
+
+    // Data efetiva para mostrar no placeholder
+    var fmt15 = fmtDateKey(autoD15);
+    var fmt30 = fmtDateKey(autoD30);
+
+    // Aviso se a data automática difere do dia padrão (caiu em fim de semana)
+    var aviso15 = autoD15.getDate() !== 15 ? ' ⚠️ antecipado de ' + 15 : '';
+    var diasMes = new Date(ano, m + 1, 0).getDate();
+    var aviso30 = autoD30.getDate() !== diasMes ? ' ⚠️ antecipado de ' + diasMes : '';
+
+    html += '<tr style="background:' + bg + ';border-bottom:1px solid var(--border)">'
+      + '<td style="padding:8px 10px;font-weight:700">' + nomes[m] + '</td>'
+      // Dia 15
+      + '<td style="padding:6px 8px;text-align:center">'
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:6px">'
+      + '<input type="checkbox" id="ativo15_' + m + '"' + (c.ativo15 ? ' checked' : '') + ' onchange="togglePag('+m+',15,this.checked)">'
+      + '<input type="date" id="data15_' + m + '" value="' + (c.data15 || fmt15) + '" '
+      + 'style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;' + (!c.ativo15 ? 'opacity:.4;pointer-events:none' : '') + '">'
+      + '</div>'
+      + '<div style="font-size:10px;color:#b45309;margin-top:2px">' + aviso15 + '</div>'
+      + '</td>'
+      // Dia 30
+      + '<td style="padding:6px 8px;text-align:center">'
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:6px">'
+      + '<input type="checkbox" id="ativo30_' + m + '"' + (c.ativo30 ? ' checked' : '') + ' onchange="togglePag('+m+',30,this.checked)">'
+      + '<input type="date" id="data30_' + m + '" value="' + (c.data30 || fmt30) + '" '
+      + 'style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;' + (!c.ativo30 ? 'opacity:.4;pointer-events:none' : '') + '">'
+      + '</div>'
+      + '<div style="font-size:10px;color:#b45309;margin-top:2px">' + aviso30 + '</div>'
+      + '</td>'
+      + '</tr>';
+  }
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function togglePag(mes, parcela, ativo) {
+  var inputId = 'data' + parcela + '_' + mes;
+  var el = document.getElementById(inputId);
+  if (el) { el.style.opacity = ativo ? '1' : '.4'; el.style.pointerEvents = ativo ? '' : 'none'; }
+}
+
+function salvarConfigPagamentos() {
+  var ano = _calAnoAtual;
+  var autoD15, autoD30, cfg = [];
+  for (var m = 0; m < 12; m++) {
+    autoD15 = fmtDateKey(anteciparParaDiaUtil(new Date(ano, m, 15)));
+    autoD30 = fmtDateKey(anteciparParaDiaUtil(new Date(ano, m + 1, 0)));
+    var d15val = document.getElementById('data15_' + m)?.value || '';
+    var d30val = document.getElementById('data30_' + m)?.value || '';
+    cfg.push({
+      ativo15: document.getElementById('ativo15_' + m)?.checked !== false,
+      // Se a data digitada for igual à automática, salva null (automático)
+      data15: d15val && d15val !== autoD15 ? d15val : null,
+      ativo30: document.getElementById('ativo30_' + m)?.checked !== false,
+      data30: d30val && d30val !== autoD30 ? d30val : null,
+    });
+  }
+  salvarConfigPagamentosLocal(ano, cfg);
+  notify('✅ Datas de pagamento salvas para ' + ano);
+  renderCalendario(); // atualiza o calendário
+}
+
+function resetarConfigPagamentos() {
+  if (!confirm('Restaurar todas as datas para o padrão automático?')) return;
+  localStorage.removeItem('cal_pag_' + _calAnoAtual);
+  renderTabPagamentos();
+  renderCalendario();
+  notify('Datas restauradas para o padrão automático');
+}
+
+function switchCalTab(tab) {
+  _calTabAtual = tab;
+  ['anual','mensal','pagamentos'].forEach(function(t) {
+    var el = document.getElementById('caltab-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+    var btn = document.getElementById('caltab-btn-' + t);
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? 'var(--accent)' : 'transparent';
+      btn.style.color = t === tab ? 'var(--accent)' : 'var(--text2)';
+    }
+  });
+  if (tab === 'anual') renderAnual();
+  else if (tab === 'mensal') renderMensal();
+  else if (tab === 'pagamentos') renderTabPagamentos();
+}
+
+
+function renderCalendario(){
+  // Popula select de anos
+  var sel=document.getElementById('cal-ano');
+  if(sel&&!sel.options.length){
+    var ay=new Date().getFullYear();
+    for(var y=ay-1;y<=ay+3;y++){
+      var o=document.createElement('option');
+      o.value=y;o.textContent=y;if(y===ay)o.selected=true;
+      sel.appendChild(o);
+    }
+  }
+  if(sel&&sel.value)_calAnoAtual=parseInt(sel.value);
+  // Legenda
+  var leg=document.getElementById('cal-legenda');
+  if(leg)leg.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:6px">'+Object.values(CAL_TIPOS).map(function(t){return'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:'+t.bg+';color:'+t.cor+'">'+t.icon+' '+t.label+'</span>';}).join('')+'</div>';
+  if(_calTabAtual==='anual')renderAnual();else renderMensal();
+}
+
+function renderMiniMes(ano,m,nomeMes,eventos,grande){
+  var prim=new Date(ano,m,1).getDay();
+  var total=new Date(ano,m+1,0).getDate();
+  var dias=['D','S','T','Q','Q','S','S'];
+  var fs=grande?'13px':'10px';
+  var pad=grande?'4px 2px':'2px 1px';
+  var html='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">';
+  html+='<div style="background:#1a5c38;color:#fff;text-align:center;padding:6px;font-size:'+(grande?'14px':'11px')+';font-weight:700">'+nomeMes+'</div>';
+  html+='<div style="padding:6px"><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px">';
+  dias.forEach(function(d){html+='<div style="text-align:center;font-size:9px;font-weight:700;color:var(--text3)">'+d+'</div>';});
+  html+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">';
+  for(var i=0;i<prim;i++)html+='<div></div>';
+  for(var d=1;d<=total;d++){
+    var evts=getEventosDia(ano,m,d,eventos);
+    var isHoje=new Date().getFullYear()===ano&&new Date().getMonth()===m&&new Date().getDate()===d;
+    var isFim=new Date(ano,m,d).getDay()===0||new Date(ano,m,d).getDay()===6;
+    var bg=isHoje?'#1a5c38':isFim?'#f8fafc':'transparent';
+    var cor=isHoje?'#fff':isFim?'#94a3b8':'var(--text)';
+    var tip=evts.map(function(e){return e.titulo;}).join(' | ');
+    // Barrinhas coloridas para cada evento
+    var barras=evts.slice(0,3).map(function(e){
+      return '<div style="height:'+(grande?'4px':'3px')+';background:'+CAL_TIPOS[e.tipo].cor+';border-radius:1px;flex:1;min-width:0" title="'+e.titulo+'"></div>';
+    }).join('');
+    html+='<div onclick="verEventosDia('+ano+','+(m+1)+','+d+')" title="'+tip+'" style="display:flex;flex-direction:column;align-items:center;padding:'+pad+';border-radius:4px;background:'+bg+';cursor:'+(evts.length?'pointer':'default')+'">';
+    html+='<span style="font-size:'+fs+';font-weight:'+(isHoje||evts.length?'800':'400')+';color:'+(evts.length&&!isHoje?CAL_TIPOS[evts[0].tipo].cor:cor)+'" title="'+tip+'">'+d+'</span>';
+    if(barras)html+='<div style="display:flex;gap:1px;width:100%;margin-top:1px">'+barras+'</div>';
+    html+='</div>';
+  }
+  html+='</div></div></div>';
+  return html;
+}
+
+function renderAnual(){
+  var ano=_calAnoAtual;
+  var eventos=getEventosCalendario(ano);
+  var nomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var grid=document.getElementById('cal-grid-anual');
+  if(!grid)return;
+  grid.innerHTML=nomes.map(function(n,m){return renderMiniMes(ano,m,n,eventos,false);}).join('');
+}
+
+function renderMensal(){
+  var ano=_calAnoAtual;
+  var eventos=getEventosCalendario(ano);
+  var nomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var t=document.getElementById('cal-mes-titulo');
+  if(t)t.textContent=nomes[_calMesAtual]+' '+ano;
+  var grid=document.getElementById('cal-grid-mensal');
+  if(grid)grid.innerHTML=renderMiniMes(ano,_calMesAtual,nomes[_calMesAtual],eventos,true);
+  // Agenda
+  var agenda=document.getElementById('cal-agenda-mensal');
+  if(!agenda)return;
+  var total=new Date(ano,_calMesAtual+1,0).getDate();
+  var lista=[],vistosA={};
+  for(var d=1;d<=total;d++){
+    getEventosDia(ano,_calMesAtual,d,eventos).forEach(function(e){
+      if(!vistosA[e.id]){vistosA[e.id]=true;lista.push({dia:d,evt:e});}
+    });
+  }
+  if(!lista.length){agenda.innerHTML='<div style="color:var(--text3);font-size:13px;padding:12px 0">Nenhum evento neste mês.</div>';return;}
+  agenda.innerHTML=lista.map(function(x){
+    var tp=CAL_TIPOS[x.evt.tipo];
+    return'<div style="display:flex;gap:10px;padding:8px 10px;background:'+tp.bg+';border-left:3px solid '+tp.cor+';border-radius:0 6px 6px 0;position:relative">'
+      +'<div style="font-size:16px;font-weight:900;color:'+tp.cor+';min-width:24px;text-align:center">'+x.dia+'</div>'
+      +'<div style="flex:1"><div style="font-size:12px;font-weight:700;color:'+tp.cor+'">'+x.evt.titulo+'</div>'
+      +(x.evt.obs?'<div style="font-size:11px;color:var(--text3)">'+x.evt.obs+'</div>':'')
+      +'</div>'
+      +(!x.evt.fixo?'<button onclick="abrirModalEvento(\''+x.evt.id+'\')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:0">✏️</button>':'')
+      +'</div>';
+  }).join('');
+}
+
+function navMes(dir){
+  _calMesAtual+=dir;
+  if(_calMesAtual<0){_calMesAtual=11;_calAnoAtual--;}
+  if(_calMesAtual>11){_calMesAtual=0;_calAnoAtual++;}
+  renderMensal();
+}
+
+function verEventosDia(ano,mes,dia){
+  var evts=getEventosDia(ano,mes-1,dia,getEventosCalendario(ano));
+  if(!evts.length)return;
+  var n=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  alert(dia+' de '+n[mes-1]+' de '+ano+':\n\n'+evts.map(function(e){return CAL_TIPOS[e.tipo].icon+' '+e.titulo+(e.obs?' — '+e.obs:'');}).join('\n'));
+}
+
+var _evtEditId=null;
+function abrirModalEvento(id){
+  _evtEditId=id||null;
+  document.getElementById('modal-evento-titulo').textContent=id?'Editar Evento':'Novo Evento';
+  document.getElementById('btn-excluir-evt').style.display=id?'inline-flex':'none';
+  ['evt-titulo','evt-inicio','evt-fim','evt-obs'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('evt-tipo').value='evento';
+  document.getElementById('evt-recorrente').checked=false;
+  if(id){
+    var e=getEventosUsuario().find(function(x){return x.id===id;});
+    if(e){
+      document.getElementById('evt-titulo').value=e.titulo;
+      document.getElementById('evt-tipo').value=e.tipo;
+      document.getElementById('evt-inicio').value=e.inicio;
+      document.getElementById('evt-fim').value=e.fim||'';
+      document.getElementById('evt-obs').value=e.obs||'';
+      document.getElementById('evt-recorrente').checked=!!e.recorrente;
+    }
+  }
+  abrirModal('modal-evento-cal');
+}
+
+function salvarEvento(){
+  var titulo=document.getElementById('evt-titulo').value.trim();
+  var inicio=document.getElementById('evt-inicio').value;
+  if(!titulo||!inicio){notify('Título e data são obrigatórios','error');return;}
+  var evts=getEventosUsuario();
+  var id=_evtEditId||('evt_'+Date.now());
+  var obj={id:id,titulo:titulo,tipo:document.getElementById('evt-tipo').value,inicio:inicio,fim:document.getElementById('evt-fim').value||inicio,obs:document.getElementById('evt-obs').value.trim(),recorrente:document.getElementById('evt-recorrente').checked};
+  if(_evtEditId){var i=evts.findIndex(function(x){return x.id===id;});if(i>=0)evts[i]=obj;else evts.push(obj);}
+  else evts.push(obj);
+  salvarEventosUsuario(evts);fecharModal('modal-evento-cal');notify('Evento salvo!');renderCalendario();
+}
+
+function excluirEvento(){
+  if(!_evtEditId||!confirm('Excluir este evento?'))return;
+  salvarEventosUsuario(getEventosUsuario().filter(function(x){return x.id!==_evtEditId;}));
+  fecharModal('modal-evento-cal');notify('Excluído');renderCalendario();
+}
+
+function gerarPDFCalendario(){
+  var ano=_calAnoAtual;
+  var eventos=getEventosCalendario(ano);
+  var NM=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var DS=['D','S','T','Q','Q','S','S'];
+
+  function miniMesPDF(m){
+    var prim=new Date(ano,m,1).getDay(),total=new Date(ano,m+1,0).getDate();
+    var rows='',d=1-prim;
+    while(d<=total){
+      var cells='';
+      for(var dw=0;dw<7;dw++,d++){
+        if(d<1||d>total){cells+='<td></td>';continue;}
+        var ev=getEventosDia(ano,m,d,eventos);
+        var fim=dw===0||dw===6;
+        var bg=ev.length?CAL_TIPOS[ev[0].tipo].bg:fim?'#f8fafc':'transparent';
+        var cor=ev.length?CAL_TIPOS[ev[0].tipo].cor:fim?'#94a3b8':'#1a1a1a';
+        var tip=ev.map(function(e){return e.titulo;}).join(' | ');
+        cells+='<td title="'+tip+'" style="text-align:center;padding:3px 2px;background:'+bg+';border-radius:3px;font-weight:'+(ev.length?'900':'400')+';color:'+cor+';font-size:10px">'+d+'</td>';
+      }
+      rows+='<tr>'+cells+'</tr>';
+    }
+    return'<div style="break-inside:avoid">'
+      +'<div style="background:#1a5c38;color:#fff;text-align:center;padding:4px;font-weight:700;font-size:11px;border-radius:4px 4px 0 0">'+NM[m]+'</div>'
+      +'<table style="width:100%;border-collapse:collapse"><tr>'+DS.map(function(d){return'<th style="text-align:center;padding:2px;font-size:8px;color:#888">'+d+'</th>';}).join('')+'</tr>'+rows+'</table>'
+      +'</div>';
+  }
+
+  // Lista eventos relevantes (sem operacionais e pagamentos)
+  var listaEvts=[],vistos={};
+  for(var m=0;m<12;m++){
+    var tot=new Date(ano,m+1,0).getDate();
+    for(var d=1;d<=tot;d++){
+      getEventosDia(ano,m,d,eventos).filter(function(e){return!e.operacional&&e.tipo!=='pagamento'&&e.tipo!=='aniversariantes';}).forEach(function(e){
+        var k=e.id+'_'+m;if(!vistos[k]){vistos[k]=true;listaEvts.push({mes:m,dia:d,evt:e});}
+      });
+    }
+  }
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Calendário '+ano+'</title><style>';
+  html+='*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:14px;color:#1a1a1a}';
+  html+='.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}';
+  html+='@page{margin:8mm;size:A4 portrait}@media print{body{padding:0}}';
+  html+='<\/style></head><body>';
+  html+='<div style="text-align:center;border-bottom:3px solid #1a5c38;padding-bottom:8px;margin-bottom:12px">';
+  html+='<div style="font-size:24px;font-weight:900;color:#1a5c38;letter-spacing:-1px">CALENDÁRIO '+ano+'</div>';
+  html+='<div style="font-size:12px;color:#666;margin-top:3px">Explosão Alimentos · Trindade — GO</div></div>';
+  html+='<div class="grid">';
+  for(var m=0;m<12;m++)html+=miniMesPDF(m);
+  html+='</div>';
+  // Legenda
+  html+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin:8px 0;padding:6px;background:#f8f8f8;border-radius:4px">';
+  Object.values(CAL_TIPOS).forEach(function(t){html+='<span style="font-size:8px;padding:2px 6px;border-radius:99px;background:'+t.bg+';color:'+t.cor+';font-weight:700">'+t.icon+' '+t.label+'</span>';});
+  html+='</div>';
+  // Eventos
+  html+='<div style="font-size:10px;font-weight:700;color:#1a5c38;border-bottom:1px solid #1a5c38;padding-bottom:2px;margin-bottom:6px">DATAS IMPORTANTES</div>';
+  html+='<table style="width:100%;border-collapse:collapse;font-size:9px">';
+  var umAtual=-1;
+  listaEvts.forEach(function(x){
+    if(x.mes!==umAtual){
+      html+='<tr><td colspan="3" style="padding:4px 4px 1px;font-weight:700;color:#1a5c38;font-size:9px">'+NM[x.mes].toUpperCase()+'</td></tr>';
+      umAtual=x.mes;
+    }
+    var tp=CAL_TIPOS[x.evt.tipo];
+    html+='<tr style="border-bottom:1px solid #f0f0f0"><td style="width:24px;text-align:center;font-weight:800;color:'+tp.cor+';padding:2px">'+x.dia+'</td><td style="padding:2px 6px;background:'+tp.bg+'">'+tp.icon+' '+x.evt.titulo+'</td><td style="color:#888;font-size:8px;padding:2px 4px">'+(x.evt.obs||'')+'</td></tr>';
+  });
+  html+='</table>';
+  html+='<div style="text-align:center;margin-top:10px;font-size:8px;color:#aaa">Gerado em '+new Date().toLocaleDateString('pt-BR')+' · Exp Pessoas</div>';
+  html+='</body></html>';
+  var j=window.open('','_blank');j.document.write(html);j.document.close();setTimeout(function(){j.print();},600);
+}
+
+function compartilharCalendarioWpp(){
+  var ano=_calAnoAtual;
+  var eventos=getEventosCalendario(ano);
+  var NM=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var linhas=['📅 *CALENDÁRIO '+ano+' — EXPLOSÃO ALIMENTOS*','_Trindade · Goiás_',''];
+  var listaEvts=[],vistos={};
+  for(var m=0;m<12;m++){
+    var tot=new Date(ano,m+1,0).getDate();
+    for(var d=1;d<=tot;d++){
+      getEventosDia(ano,m,d,eventos).filter(function(e){return!e.operacional&&e.tipo!=='pagamento'&&e.tipo!=='aniversariantes';}).forEach(function(e){
+        var k=e.id+'_'+m;if(!vistos[k]){vistos[k]=true;listaEvts.push({mes:m,dia:d,evt:e});}
+      });
+    }
+  }
+  var umAtual=-1;
+  listaEvts.forEach(function(x){
+    if(x.mes!==umAtual){linhas.push('');linhas.push('📆 *'+NM[x.mes].toUpperCase()+'*');umAtual=x.mes;}
+    var tp=CAL_TIPOS[x.evt.tipo];
+    linhas.push(tp.icon+' *'+String(x.dia).padStart(2,'0')+'/'+String(x.mes+1).padStart(2,'0')+'* — '+x.evt.titulo+(x.evt.obs?' _('+x.evt.obs+')_':''));
+  });
+  linhas.push('');linhas.push('_Explosão Alimentos — Exp Pessoas_');
+  window.open('https://wa.me/?text='+encodeURIComponent(linhas.join('\n')),'_blank');
+}
 </script>
 
 <!-- ═══ BOTTOM NAV (mobile) ══════════════════════════════ -->
@@ -7867,6 +9048,7 @@ function carregarXLSDia30(input){
   <button class="bnav-btn" onclick="showPage('colaboradores',this)" data-page="colaboradores"><span>👥</span>Pessoas</button>
   <button class="bnav-btn" onclick="showPage('ferias',this)" data-page="ferias"><span>🏖️</span>Férias</button>
   <button class="bnav-btn" onclick="showPage('advertencias',this)" data-page="advertencias"><span>⚠️</span>Advert.</button>
+  <button class="bnav-btn" onclick="showPage('atestados',this)" data-page="atestados"><span>🏥</span>Atestados</button>
   <button class="bnav-btn" onclick="showPage('pagamentos',this)" data-page="pagamentos"><span>💰</span>Pgtos</button>
   <button class="bnav-btn" onclick="showPage('pix',this)" data-page="pix"><span>💸</span>PIX</button>
   <button class="bnav-btn" onclick="showPage('documentos',this)" data-page="documentos"><span>📁</span>Docs</button>
@@ -7874,6 +9056,7 @@ function carregarXLSDia30(input){
   <button class="bnav-btn" onclick="showPage('talentos',this)" data-page="talentos"><span>🎯</span>Talentos</button>
   <button class="bnav-btn" onclick="showPage('aniversarios',this)" data-page="aniversarios"><span>🎂</span>Aniv.</button>
   <button class="bnav-btn" onclick="showPage('desligamentos',this)" data-page="desligamentos"><span>📋</span>Desl.</button>
+  <button class="bnav-btn" onclick="showPage('calendario',this)" data-page="calendario"><span>📅</span>Agenda</button>
   <button class="bnav-btn" onclick="showPage('config',this)" data-page="config"><span>⚙️</span>Config</button>
 </nav>
 </body>
