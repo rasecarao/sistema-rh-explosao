@@ -568,13 +568,20 @@ tbody tr:hover td{background:var(--bg)}
 
     <!-- Aniversário de Casa -->
     <div class="card" style="padding:0;overflow:hidden;grid-column:1/-1">
-      <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div style="font-size:13px;font-weight:700;color:var(--text)">🏠 Aniversário de Casa</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:1px">Colaboradores que completam anos de empresa este mês</div>
-        </div>
+      <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:700;color:var(--text)">🏠 Aniversário de Casa — Este Mês</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:1px">Colaboradores que completam anos de empresa este mês</div>
       </div>
       <div id="dash-aniv-casa-list" style="padding:10px 16px"></div>
+    </div>
+
+    <!-- Aniversário de Casa Mês Seguinte -->
+    <div class="card" style="padding:0;overflow:hidden;grid-column:1/-1">
+      <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:700;color:var(--text)">🏠 Aniversário de Casa — Mês Seguinte</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:1px">Colaboradores que completam anos de empresa no próximo mês</div>
+      </div>
+      <div id="dash-aniv-casa-prox-list" style="padding:10px 16px"></div>
     </div>
 
     <!-- Headcount + ASO lado a lado -->
@@ -2264,45 +2271,50 @@ function renderDashboard(){
   const bdCoresProx=['#0369a1','#7c3aed','#1a5c38','#b45309','#9f1239','#0f766e','#1d4ed8'];
   bdCard(bdaysProx,bdElProx,bdCoresProx);
 
-  // Aniversário de Casa — colaboradores que completam anos de empresa este mês
-  const anivCasaEl=document.getElementById('dash-aniv-casa-list');
-  if(anivCasaEl){
-    const mesHoje=new Date().getMonth()+1;
-    const anoHoje=new Date().getFullYear();
-    const anivCasa=colabsFiltrados.filter(c=>{
+  // Aniversário de Casa — função reutilizável
+  var anoHoje=new Date().getFullYear();
+  function renderAnivCasaCard(elId, mes, ano){
+    var el=document.getElementById(elId);
+    if(!el)return;
+    var lista=colabsFiltrados.filter(function(c){
       if(c.status==='Desligado'||!c.admissao)return false;
-      const nd=normalizarData(c.admissao);
+      var nd=normalizarData(c.admissao);
       if(!nd)return false;
-      const partes=nd.split('-');
-      const mesAdm=parseInt(partes[1]);
-      const anoAdm=parseInt(partes[0]);
-      return mesAdm===mesHoje&&anoAdm<anoHoje; // mesmo mês, ano anterior
-    }).map(c=>{
-      const nd=normalizarData(c.admissao);
-      const anoAdm=parseInt(nd.split('-')[0]);
-      const anos=anoHoje-anoAdm;
-      const dia=parseInt(nd.split('-')[2]);
-      return{...c,anos,dia};
-    }).sort((a,b)=>a.dia-b.dia);
+      var partes=nd.split('-');
+      return parseInt(partes[1])===mes&&parseInt(partes[0])<ano;
+    }).map(function(c){
+      var nd=normalizarData(c.admissao);
+      var partes=nd.split('-');
+      var anos=ano-parseInt(partes[0]);
+      var dia=parseInt(partes[2]);
+      return Object.assign({},c,{anos:anos,dia:dia});
+    }).sort(function(a,b){return a.dia-b.dia;});
 
-    if(!anivCasa.length){
-      anivCasaEl.innerHTML='<div style="padding:8px 0;font-size:13px;color:var(--text3)">Nenhum aniversário de casa neste mês.</div>';
-    } else {
-      const cores=['#1a5c38','#0369a1','#7c3aed','#d97706','#db2777','#0f766e','#dc2626'];
-      anivCasaEl.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;padding:4px 0">'+
-        anivCasa.map(function(c,i){
-          const cor=cores[i%cores.length];
-          const emoji=c.anos>=10?'🏆':c.anos>=5?'⭐':c.anos>=3?'🥉':'🎖️';
-          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);border-left:3px solid '+cor+';background:var(--surface2)">'
-            +'<div style="width:34px;height:34px;border-radius:50%;background:'+cor+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">'+c.anos+'</div>'
-            +'<div style="min-width:0">'
-              +'<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+emoji+' '+c.nome.split(' ').slice(0,2).join(' ')+'</div>'
-              +'<div style="font-size:10px;color:var(--text3)">'+c.anos+' ano'+(c.anos>1?'s':'')+' · dia '+String(c.dia).padStart(2,'0')+'/'+String(mesHoje).padStart(2,'0')+'</div>'
-            +'</div>'
-            +'</div>';
-        }).join('')+'</div>';
+    if(!lista.length){
+      el.innerHTML='<div style="padding:8px 0;font-size:13px;color:var(--text3)">Nenhum aniversário de casa neste mês.</div>';
+      return;
     }
+    var cores=['#1a5c38','#0369a1','#7c3aed','#d97706','#db2777','#0f766e','#dc2626'];
+    el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;padding:4px 0">'+
+      lista.map(function(c,i){
+        var cor=cores[i%cores.length];
+        var emoji=c.anos>=10?'🏆':c.anos>=5?'⭐':c.anos>=3?'🥉':'🎖️';
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);border-left:3px solid '+cor+';background:var(--surface2)">'
+          +'<div style="width:34px;height:34px;border-radius:50%;background:'+cor+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">'+c.anos+'</div>'
+          +'<div style="min-width:0">'
+            +'<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+emoji+' '+c.nome.split(' ').slice(0,2).join(' ')+'</div>'
+            +'<div style="font-size:10px;color:var(--text3)">'+c.anos+' ano'+(c.anos>1?'s':'')+' · dia '+String(c.dia).padStart(2,'0')+'/'+String(mes).padStart(2,'0')+'</div>'
+          +'</div>'
+          +'</div>';
+      }).join('')+'</div>';
   }
+
+  // Este mês
+  renderAnivCasaCard('dash-aniv-casa-list', new Date().getMonth()+1, anoHoje);
+  // Mês seguinte
+  var proxMes=new Date().getMonth()+2>12?1:new Date().getMonth()+2;
+  var proxAno=new Date().getMonth()+2>12?anoHoje+1:anoHoje;
+  renderAnivCasaCard('dash-aniv-casa-prox-list', proxMes, proxAno);
 
   // Headcount
   const hc={};
