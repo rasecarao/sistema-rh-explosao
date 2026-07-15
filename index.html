@@ -2298,7 +2298,7 @@ function renderDashboard(){
     el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;padding:4px 0">'+
       lista.map(function(c,i){
         var cor=cores[i%cores.length];
-        var emoji=c.anos>=10?'🏆':c.anos>=5?'⭐':c.anos>=3?'🥉':'🎖️';
+        var emoji=c.anos>=20?'🏆':c.anos>=15?'🥇':c.anos>=10?'🥈':c.anos>=5?'🥉':c.anos>=4?'🏅':c.anos>=3?'🎖️':c.anos>=2?'⭐':'🌱';
         return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);border-left:3px solid '+cor+';background:var(--surface2)">'
           +'<div style="width:34px;height:34px;border-radius:50%;background:'+cor+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">'+c.anos+'</div>'
           +'<div style="min-width:0">'
@@ -7166,7 +7166,7 @@ function gerarConferencia(){
     var id=v.colaboradorId;
     if(!mapa[id])mapa[id]={nome:v.colaboradorNome,vales:[],total:0};
     mapa[id].vales.push(v);
-    mapa[id].total+=parseSalario(String(v.valor).replace(/\./g,'').replace(',','.'));
+    mapa[id].total+=parseSalario(v.valor);
   });
 
   // Ordena por nome
@@ -7195,7 +7195,7 @@ function gerarConferencia(){
     var bg=i%2===0?'#fff':'#f7faf8';
     var valesStr=g.vales.map(function(v){
       var d=fmtData(v.data);
-      var vl=fmtMoeda(parseSalario(String(v.valor).replace(/\./g,'').replace(',','.')));
+      var vl=fmtMoeda(parseSalario(v.valor));
       return d+' · '+vl+(v.obs?' ('+v.obs+')':'');
     }).join('<br>');
     html+='<tr style="background:'+bg+';border-bottom:1px solid #e2e8f0">';
