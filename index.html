@@ -463,6 +463,7 @@ tbody tr:hover td{background:var(--bg)}
   <button class="nav-btn" onclick="showPage('colaboradores',this)"><span class="nav-icon">👥</span>Colaboradores</button>
   <button class="nav-btn" onclick="showPage('ferias',this)"><span class="nav-icon">🏖️</span>Férias</button>
   <button class="nav-btn" onclick="showPage('carreira',this)"><span class="nav-icon">📈</span>Carreira</button>
+  <button class="nav-btn" onclick="showPage('quadro',this)"><span class="nav-icon">🏗️</span>Quadro de Vagas</button>
   <button class="nav-btn" onclick="showPage('advertencias',this)"><span class="nav-icon">⚠️</span>Advertências</button>
   <button class="nav-btn" onclick="showPage('atestados',this)"><span class="nav-icon">🏥</span>Atestados</button>
   <button class="nav-btn" onclick="showPage('aniversarios',this)"><span class="nav-icon">🎂</span>Aniversários</button>
@@ -719,6 +720,53 @@ tbody tr:hover td{background:var(--bg)}
       <div id="lista-progressao"><div class="empty">Nenhum registro.</div></div>
     </div>
   </div>
+</div>
+
+<!-- ═══ QUADRO DE VAGAS ══════════════════════════════════ -->
+<div class="page" id="page-quadro">
+
+  <!-- Cabeçalho + filtros -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-size:18px;font-weight:800;color:var(--text)">🏗️ Quadro de Vagas</div>
+      <div style="font-size:12px;color:var(--text3)">Árvore de cargos por setor · controle de vagas · custo da folha</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select id="qv-filtro-empresa" onchange="renderQuadroVagas()" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+        <option value="">Todas as Empresas</option>
+        <option value="Explosão Alimentos">Explosão Alimentos</option>
+        <option value="AGS Distribuidora">AGS Distribuidora</option>
+      </select>
+      <select id="qv-filtro-setor" onchange="renderQuadroVagas()" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+        <option value="">Todos os Setores</option>
+      </select>
+      <button class="btn btn-sm" onclick="abrirModalCargo()" style="background:var(--accent);color:#fff;border-color:var(--accent)">＋ Novo Cargo</button>
+    </div>
+  </div>
+
+  <!-- KPIs gerais -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px" id="qv-kpis">
+    <div class="card" style="padding:12px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:var(--accent)" id="qv-k-cargos">0</div>
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Cargos</div>
+    </div>
+    <div class="card" style="padding:12px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:#2563eb" id="qv-k-vagas">0</div>
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Vagas Totais</div>
+    </div>
+    <div class="card" style="padding:12px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:#16a34a" id="qv-k-livres">0</div>
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Vagas Livres</div>
+    </div>
+    <div class="card" style="padding:12px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:#7c3aed" id="qv-k-folha">R$ 0</div>
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Custo Folha Bruta</div>
+    </div>
+  </div>
+
+  <!-- Árvore de setores/cargos -->
+  <div id="qv-arvore"></div>
+
 </div>
 
 <!-- ═══ ADVERTÊNCIAS ════════════════════════════════════ -->
@@ -2019,6 +2067,7 @@ tbody tr:hover td{background:var(--bg)}
         <div class="form-group"><label>Setor *</label><select id="cargo-setor"><option>Administração</option><option>Comercial</option><option>Compras</option><option>Empacotamento</option><option>Engenharia</option><option>Expedição</option><option>Financeiro</option><option>Logística</option><option>Manutenção</option><option>Produção</option><option>RH</option><option>Serviços Gerais</option><option>TI</option><option>Outro</option></select></div>
         <div class="form-group"><label>Salário Base (R$)</label><input type="number" id="cargo-sal-base" placeholder="0,00" step="0.01"></div>
         <div class="form-group"><label>Salário Máximo (R$)</label><input type="number" id="cargo-sal-max" placeholder="0,00" step="0.01"></div>
+        <div class="form-group"><label>Total de Vagas</label><input type="number" id="cargo-vagas" min="0" placeholder="Ex: 30" title="Deixe 0 ou vazio para ilimitado"></div>
         <div class="form-group" style="grid-column:1/-1"><label>Atribuições</label><textarea id="cargo-desc" rows="3" placeholder="Descreva as atribuições..."></textarea></div>
         <div class="form-group" style="grid-column:1/-1"><label>Requisitos</label><textarea id="cargo-req" rows="2" placeholder="Ex: Ensino médio completo..."></textarea></div>
       </div>
@@ -2184,7 +2233,7 @@ function showPage(id,btn){
   // Sincroniza bottom nav
   const bBtn=document.querySelector(`.bnav-btn[data-page="${id}"]`);
   if(bBtn)bBtn.classList.add('active');
-  const m={dashboard:renderDashboard,colaboradores:renderColabs,ferias:renderFerias,carreira:renderCarreira,advertencias:()=>{populateSelectColabs(['adv-colaborador']);renderAdvertencias();},atestados:()=>{populateSelectColabs(['at-colaborador']);renderAtestados();},aniversarios:renderAniversarios,desligamentos:()=>{populateSelectColabs(['desl-colaborador'],true);renderDesligamentos();},documentos:()=>{populateSelectColabs(['doc-filtro-colab','doc-colab']);renderDocumentos();},talentos:renderTalentos,pix:()=>{populateSelectColabs(['pix-colab','pix-filtro-colab']);renderPix();},pagamentos:renderPagePagamentos,config:carregarConfig,calendario:renderCalendario};
+  const m={dashboard:renderDashboard,colaboradores:renderColabs,ferias:renderFerias,carreira:renderCarreira,quadro:renderQuadroVagas,advertencias:()=>{populateSelectColabs(['adv-colaborador']);renderAdvertencias();},atestados:()=>{populateSelectColabs(['at-colaborador']);renderAtestados();},aniversarios:renderAniversarios,desligamentos:()=>{populateSelectColabs(['desl-colaborador'],true);renderDesligamentos();},documentos:()=>{populateSelectColabs(['doc-filtro-colab','doc-colab']);renderDocumentos();},talentos:renderTalentos,pix:()=>{populateSelectColabs(['pix-colab','pix-filtro-colab']);renderPix();},pagamentos:renderPagePagamentos,config:carregarConfig,calendario:renderCalendario};
   if(m[id])m[id]();
 }
 
@@ -2691,7 +2740,8 @@ function abrirModalCargo(id){
   document.getElementById('modal-cargo-title').textContent=id?'Editar Cargo':'Novo Cargo';
   ['nome','desc','req'].forEach(f=>{const el=document.getElementById('cargo-'+f);if(el)el.value='';});
   ['sal-base','sal-max'].forEach(f=>{const el=document.getElementById('cargo-'+f);if(el)el.value='';});
-  if(id){const c=DB.cargos.find(x=>x.id==id);if(c){document.getElementById('cargo-nome').value=c.nome;document.getElementById('cargo-setor').value=c.setor;document.getElementById('cargo-sal-base').value=c.salBase;document.getElementById('cargo-sal-max').value=c.salMax;document.getElementById('cargo-desc').value=c.desc||'';;document.getElementById('cargo-req').value=c.req||'';}
+  const vagasEl=document.getElementById('cargo-vagas');if(vagasEl)vagasEl.value='';
+  if(id){const c=DB.cargos.find(x=>x.id==id);if(c){document.getElementById('cargo-nome').value=c.nome;document.getElementById('cargo-setor').value=c.setor;document.getElementById('cargo-sal-base').value=c.salBase;document.getElementById('cargo-sal-max').value=c.salMax;document.getElementById('cargo-desc').value=c.desc||'';document.getElementById('cargo-req').value=c.req||'';if(vagasEl)vagasEl.value=c.vagas||'';}
     document.getElementById('btn-salvar-cargo').onclick=()=>salvarCargo(id);
   }else document.getElementById('btn-salvar-cargo').onclick=()=>salvarCargo();
   abrirModal('modal-cargo');
@@ -2700,9 +2750,10 @@ function editarCargo(id){abrirModalCargo(id);}
 function salvarCargo(editId){
   const nome=document.getElementById('cargo-nome').value.trim();
   if(!nome){notify('Nome obrigatório','error');return;}
-  const obj={id:editId||gerarId(),nome,setor:document.getElementById('cargo-setor').value,salBase:document.getElementById('cargo-sal-base').value,salMax:document.getElementById('cargo-sal-max').value,desc:document.getElementById('cargo-desc').value.trim(),req:document.getElementById('cargo-req').value.trim()};
+  const vagasEl=document.getElementById('cargo-vagas');
+  const obj={id:editId||gerarId(),nome,setor:document.getElementById('cargo-setor').value,salBase:document.getElementById('cargo-sal-base').value,salMax:document.getElementById('cargo-sal-max').value,desc:document.getElementById('cargo-desc').value.trim(),req:document.getElementById('cargo-req').value.trim(),vagas:vagasEl?parseInt(vagasEl.value)||0:0};
   if(editId){const i=DB.cargos.findIndex(c=>c.id==editId);DB.cargos[i]=obj;}else DB.cargos.push(obj);
-  salvarDB();fecharModal('modal-cargo');renderCarreira();notify(editId?'Cargo atualizado!':'Cargo cadastrado!');
+  salvarDB();fecharModal('modal-cargo');renderCarreira();renderQuadroVagas&&renderQuadroVagas();notify(editId?'Cargo atualizado!':'Cargo cadastrado!');
   sincronizarScript(editId?'editarCargo':'novoCargo',obj);
 }
 function renderProgressao(q){
@@ -6856,7 +6907,8 @@ function calcularAdiantamento15(colab, mesAno, salarioJaParsed){
       const d=String(v.data||'').trim();
       return d>=inicio&&d<=fim;
     })
-    .reduce((s,v)=>s+parseSalario(v.valor),0);
+    .reduce((s,v)=>s+parseSalarioVale(v.valor),0);
+  // Math.max(0,...) garante que nunca fique negativo
   const liquido=Math.max(0,Math.round((bruto40-totalVales)*100)/100);
   return{bruto40,totalVales,liquido};
 }
@@ -6903,6 +6955,32 @@ function criarValesComplementares(){
 }
 
 let _itauDados=[];
+
+/**
+ * parseSalarioVale — converte valor de vale para número float.
+ * Trata todos os formatos que o Google Sheets pode retornar:
+ *   - number JS:        371.29   → 371.29
+ *   - string US:       "371.29"  → 371.29
+ *   - string BR:       "371,29"  → 371.29
+ *   - string BR milhar:"1.500,00"→ 1500.00
+ *   - string inteiro:  "371"     → 371.00
+ * A chave: só remove pontos de milhar quando há vírgula no valor
+ * (formato BR), nunca remove ponto de decimal US.
+ */
+function parseSalarioVale(v){
+  if(v===null||v===undefined||v==='')return 0;
+  // Já é número JS — retorna direto (ex: 371.29 vindo do Sheets como float)
+  if(typeof v==='number')return isFinite(v)?v:0;
+  var s=String(v).trim().replace(/R\$\s*/g,'').replace(/\s/g,'');
+  if(!s)return 0;
+  // Tem vírgula → formato brasileiro
+  if(s.indexOf(',')!==-1){
+    // Remove pontos de milhar e troca vírgula por ponto decimal
+    return parseFloat(s.replace(/\./g,'').replace(',','.'))||0;
+  }
+  // Sem vírgula → ponto é decimal (formato US) ou inteiro
+  return parseFloat(s)||0;
+}
 
 function parseSalario(v){
   if(v===null||v===undefined||v==='')return 0;
@@ -6973,7 +7051,7 @@ function previewItau(){
       var cpfLimpo=String(c.cpf||'').replace(/\D/g,'');
       var pc=parseConta(c.conta);
       var semBanco=!(c.agencia||c.conta);
-      return{agencia:String(c.agencia||'').replace(/\D/g,''),conta:pc.conta,digito:pc.digito,nome:c.nome||'',cpf:cpfLimpo,finalidade:finalidade,valor:liquido||bruto40,semBanco:semBanco,_bruto40:bruto40,_totalVales:totalVales,_colabId:String(c.id),_excedente:totalVales>bruto40?Math.round((totalVales-bruto40)*100)/100:0};
+      return{agencia:String(c.agencia||'').replace(/\D/g,''),conta:pc.conta,digito:pc.digito,nome:c.nome||'',cpf:cpfLimpo,finalidade:finalidade,valor:liquido>0?liquido:0,semBanco:semBanco,_bruto40:bruto40,_totalVales:totalVales,_colabId:String(c.id),_excedente:totalVales>bruto40?Math.round((totalVales-bruto40)*100)/100:0};
     });
 
     // Detecta excedentes e abre modal de alerta
@@ -7166,7 +7244,8 @@ function gerarConferencia(){
     var id=v.colaboradorId;
     if(!mapa[id])mapa[id]={nome:v.colaboradorNome,vales:[],total:0};
     mapa[id].vales.push(v);
-    mapa[id].total+=parseSalario(v.valor);
+    // Converte valor com função robusta que trata qualquer formato
+    mapa[id].total+=parseSalarioVale(v.valor);
   });
 
   // Ordena por nome
@@ -7195,7 +7274,7 @@ function gerarConferencia(){
     var bg=i%2===0?'#fff':'#f7faf8';
     var valesStr=g.vales.map(function(v){
       var d=fmtData(v.data);
-      var vl=fmtMoeda(parseSalario(v.valor));
+      var vl=fmtMoeda(parseSalarioVale(v.valor));
       return d+' · '+vl+(v.obs?' ('+v.obs+')':'');
     }).join('<br>');
     html+='<tr style="background:'+bg+';border-bottom:1px solid #e2e8f0">';
@@ -8451,6 +8530,176 @@ function gerarRelatorioAtestados() {
   var j=window.open('','_blank');j.document.write(html);j.document.close();setTimeout(function(){j.print();},500);
 }
 
+// ══════════════════════════════════════════════════════════
+// QUADRO DE VAGAS
+// ══════════════════════════════════════════════════════════
+
+function renderQuadroVagas(){
+  var empFiltro=document.getElementById('qv-filtro-empresa')?.value||'';
+  var setorFiltro=document.getElementById('qv-filtro-setor')?.value||'';
+
+  // Colaboradores ativos
+  var ativos=DB.colaboradores.filter(function(c){
+    if(colabExcluido(c))return false;
+    if(empFiltro&&c.empresa!==empFiltro)return false;
+    return true;
+  });
+
+  // Mapa de cargos pelo nome
+  var cargoMap={};
+  DB.cargos.forEach(function(c){cargoMap[String(c.nome||'').trim()]=c;});
+
+  // Descobre setor do cargo usando colaboradores como fonte primária
+  function getSetorDoCargo(nomeCargo){
+    var sample=ativos.find(function(c){return String(c.cargo||'').trim()===nomeCargo;});
+    if(sample&&sample.setor)return String(sample.setor).trim();
+    var reg=cargoMap[nomeCargo];
+    return reg&&reg.setor?String(reg.setor).trim():'Sem Setor';
+  }
+
+  // União de cargos cadastrados + cargos em uso pelos colaboradores
+  var nomesCargosCad=DB.cargos.map(function(c){return String(c.nome||'').trim();});
+  var nomesColabs=[...new Set(ativos.map(function(c){return String(c.cargo||'').trim();}).filter(Boolean))];
+  var todosNomes=[...new Set([...nomesCargosCad,...nomesColabs])].filter(Boolean).sort();
+
+  // Popula filtro de setores
+  var setoresUnion=[...new Set(todosNomes.map(getSetorDoCargo))].sort();
+  var selSetor=document.getElementById('qv-filtro-setor');
+  if(selSetor){
+    var curVal=selSetor.value;
+    selSetor.innerHTML='<option value="">Todos os Setores</option>'+
+      setoresUnion.map(function(s){return'<option value="'+s+'"'+(s===curVal?' selected':'')+'>'+s+'</option>';}).join('');
+  }
+
+  // Filtra por setor
+  if(setorFiltro)todosNomes=todosNomes.filter(function(n){return getSetorDoCargo(n)===setorFiltro;});
+
+  // KPIs
+  var totalVagas=0,totalLivres=0,totalFolha=0;
+  todosNomes.forEach(function(nome){
+    var reg=cargoMap[nome];
+    var ocup=ativos.filter(function(c){return String(c.cargo||'').trim()===nome;}).length;
+    var vagas=reg?parseInt(reg.vagas)||0:0;
+    totalVagas+=vagas;
+    if(vagas>0)totalLivres+=Math.max(0,vagas-ocup);
+  });
+  ativos.forEach(function(c){totalFolha+=parseSalario(c.salario)||0;});
+  document.getElementById('qv-k-cargos').textContent=todosNomes.length;
+  document.getElementById('qv-k-vagas').textContent=totalVagas||'∞';
+  document.getElementById('qv-k-livres').textContent=totalVagas?totalLivres:'—';
+  document.getElementById('qv-k-folha').textContent=fmtMoeda(totalFolha);
+
+  // Agrupa por setor
+  var porSetor={};
+  todosNomes.forEach(function(nome){
+    var s=getSetorDoCargo(nome);
+    if(!porSetor[s])porSetor[s]=[];
+    porSetor[s].push(nome);
+  });
+
+  var arvore=document.getElementById('qv-arvore');
+  if(!arvore)return;
+  if(!Object.keys(porSetor).length){
+    arvore.innerHTML='<div class="card"><div class="empty">Nenhum cargo encontrado.</div></div>';
+    return;
+  }
+
+  arvore.innerHTML=Object.entries(porSetor).sort(function(a,b){return a[0].localeCompare(b[0],'pt-BR');}).map(function(entry){
+    var setor=entry[0],nomes=entry[1];
+    var setorOcup=0,setorVagas=0,setorFolha=0,setorLivres=0;
+    nomes.forEach(function(nome){
+      var reg=cargoMap[nome];
+      var ocup=ativos.filter(function(c){return String(c.cargo||'').trim()===nome;}).length;
+      var vagas=reg?parseInt(reg.vagas)||0:0;
+      setorOcup+=ocup;setorVagas+=vagas;
+      if(vagas>0)setorLivres+=Math.max(0,vagas-ocup);
+      ativos.filter(function(c){return String(c.cargo||'').trim()===nome;}).forEach(function(c){setorFolha+=parseSalario(c.salario)||0;});
+    });
+
+    var linhas=nomes.sort(function(a,b){return a.localeCompare(b,'pt-BR');}).map(function(nome){
+      var reg=cargoMap[nome];
+      var collabs=ativos.filter(function(c){return String(c.cargo||'').trim()===nome;});
+      var ocup=collabs.length;
+      var vagas=reg?parseInt(reg.vagas)||0:0;
+      var livres=vagas>0?Math.max(0,vagas-ocup):null;
+      var pct=vagas>0?Math.min(100,Math.round(ocup/vagas*100)):null;
+      var folhaCargo=collabs.reduce(function(s,c){return s+(parseSalario(c.salario)||0);},0);
+      var statusCor,statusLabel,statusBg;
+      if(!vagas){statusCor='#6b7280';statusBg='#f3f4f6';statusLabel='Sem limite';}
+      else if(livres===0){statusCor='#dc2626';statusBg='#fee2e2';statusLabel='🔴 Lotado';}
+      else if(livres<=2){statusCor='#d97706';statusBg='#fef3c7';statusLabel='⚠️ '+livres+' livre'+(livres>1?'s':'');}
+      else{statusCor='#16a34a';statusBg='#dcfce7';statusLabel='✅ '+livres+' livres';}
+      var barraHtml=vagas>0
+        ?'<div style="margin-top:5px;background:#e5e7eb;border-radius:99px;height:4px"><div style="height:100%;background:'+(pct>=100?'#dc2626':pct>=80?'#d97706':'#16a34a')+';width:'+pct+'%;border-radius:99px"></div></div>'
+         +'<div style="font-size:9px;color:var(--text3);margin-top:2px">'+ocup+' / '+vagas+' ocupadas · '+pct+'%</div>'
+        :'<div style="font-size:10px;color:var(--text3);margin-top:3px">'+ocup+' colaborador(es)</div>';
+      var colabsHtml=collabs.length
+        ?collabs.map(function(c){
+          return'<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">'
+            +'<div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(c.nome||'?')[0]+'</div>'
+            +'<span style="font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.nome+'</span>'
+            +'<span style="font-size:10px;color:var(--text3);flex-shrink:0">'+c.empresa+'</span>'
+            +'<span style="font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0">'+fmtMoeda(parseSalario(c.salario))+'</span>'
+            +'</div>';
+        }).join('')
+        :'<div style="font-size:12px;color:var(--text3);padding:6px 0">Vaga disponível — sem colaborador</div>';
+      var editId2=reg?reg.id:'';
+      var editBtn=reg
+        ?'<button onclick="event.stopPropagation();editarCargo(\''+editId2+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;flex-shrink:0">✏️</button>'
+        :'<button onclick="event.stopPropagation();abrirModalCargo()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;flex-shrink:0">＋</button>';
+      return'<div style="border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden">'
+        +'<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);cursor:pointer" onclick="toggleCargoDetails(this)">'
+          +'<div style="flex:1;min-width:0">'
+            +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+              +'<span style="font-size:13px;font-weight:700">💼 '+nome+'</span>'
+              +(!reg?'<span style="font-size:10px;color:#b45309;background:#fef3c7;padding:2px 6px;border-radius:99px">Sem cadastro</span>':'')
+              +'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:'+statusBg+';color:'+statusCor+'">'+statusLabel+'</span>'
+            +'</div>'
+            +(reg&&reg.salBase?'<div style="font-size:10px;color:var(--text3);margin-top:2px">Base: '+fmtMoeda(Number(reg.salBase))+(reg.salMax?' · Máx: '+fmtMoeda(Number(reg.salMax)):'')+'</div>':'')
+            +barraHtml
+          +'</div>'
+          +'<div style="text-align:right;flex-shrink:0"><div style="font-size:10px;color:var(--text3)">Folha</div>'
+            +'<div style="font-size:13px;font-weight:700;color:var(--accent)">'+fmtMoeda(folhaCargo)+'</div></div>'
+          +editBtn
+          +'<span style="color:var(--text3);font-size:12px;flex-shrink:0">▼</span>'
+        +'</div>'
+        +'<div class="cargo-details" style="display:none;padding:10px 14px;border-top:1px solid var(--border)">'
+          +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Colaboradores ('+collabs.length+')</div>'
+          +colabsHtml
+          +(reg&&reg.desc?'<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)"><b>Atribuições:</b> '+reg.desc+'</div>':'')
+          +(reg&&reg.req?'<div style="margin-top:4px;font-size:11px;color:var(--text3)"><b>Requisitos:</b> '+reg.req+'</div>':'')
+        +'</div></div>';
+    }).join('');
+
+    return'<div style="margin-bottom:20px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(135deg,#1a5c38,#2d8a57);border-radius:var(--radius) var(--radius) 0 0;color:#fff">'
+        +'<div><div style="font-size:14px;font-weight:800">🏭 '+setor+'</div>'
+          +'<div style="font-size:11px;opacity:.8;margin-top:1px">'+nomes.length+' cargo(s) · '+setorOcup+' colaboradores'+(setorVagas?' · '+setorLivres+' vagas livres':'')+'</div></div>'
+        +'<div style="text-align:right"><div style="font-size:10px;opacity:.7">Folha do setor</div>'
+          +'<div style="font-size:15px;font-weight:800">'+fmtMoeda(setorFolha)+'</div></div>'
+      +'</div>'
+      +'<div style="padding:10px;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);background:var(--surface)">'+linhas+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function toggleCargoDetails(header){
+  var details=header.parentElement.querySelector('.cargo-details');
+  var arrow=header.querySelector('span:last-child');
+  if(!details)return;
+  var open=details.style.display!=='none';
+  details.style.display=open?'none':'block';
+  if(arrow)arrow.textContent=open?'▼':'▲';
+}
+
+function criarCargoPara(nome,setor){
+  abrirModalCargo();
+  setTimeout(function(){
+    var el=document.getElementById('cargo-nome');if(el)el.value=nome;
+    var es=document.getElementById('cargo-setor');if(es)es.value=setor;
+  },50);
+}
+
 var _calAnoAtual=new Date().getFullYear();
 var _calMesAtual=new Date().getMonth();
 var _calTabAtual='anual';
@@ -9127,6 +9376,7 @@ function compartilharCalendarioWpp(){
   <button class="bnav-btn" onclick="showPage('pix',this)" data-page="pix"><span>💸</span>PIX</button>
   <button class="bnav-btn" onclick="showPage('documentos',this)" data-page="documentos"><span>📁</span>Docs</button>
   <button class="bnav-btn" onclick="showPage('carreira',this)" data-page="carreira"><span>📈</span>Carreira</button>
+  <button class="bnav-btn" onclick="showPage('quadro',this)" data-page="quadro"><span>🏗️</span>Vagas</button>
   <button class="bnav-btn" onclick="showPage('talentos',this)" data-page="talentos"><span>🎯</span>Talentos</button>
   <button class="bnav-btn" onclick="showPage('aniversarios',this)" data-page="aniversarios"><span>🎂</span>Aniv.</button>
   <button class="bnav-btn" onclick="showPage('desligamentos',this)" data-page="desligamentos"><span>📋</span>Desl.</button>
