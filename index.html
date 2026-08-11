@@ -709,7 +709,7 @@ tbody tr:hover td{background:var(--bg)}
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Cargo</th><th>Setor</th><th>Sal. Base</th><th>Sal. Máx</th><th>Colabs</th><th></th></tr></thead>
+          <thead><tr><th>Cargo</th><th>Setor</th><th>Sal. Base</th><th>Níveis</th><th>Sal. Máx</th><th>Vagas/Nível</th><th>Colabs</th><th></th></tr></thead>
           <tbody id="body-cargos"><tr><td colspan="6" class="empty">Nenhum cargo.</td></tr></tbody>
         </table>
       </div>
@@ -729,7 +729,7 @@ tbody tr:hover td{background:var(--bg)}
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
     <div>
       <div style="font-size:18px;font-weight:800;color:var(--text)">🏗️ Quadro de Vagas</div>
-      <div style="font-size:12px;color:var(--text3)">Árvore de cargos por setor · controle de vagas · custo da folha</div>
+      <div style="font-size:12px;color:var(--text3)">Painel gerencial · vagas em aberto · alertas · custo da folha</div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <select id="qv-filtro-empresa" onchange="renderQuadroVagas()" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
@@ -740,12 +740,19 @@ tbody tr:hover td{background:var(--bg)}
       <select id="qv-filtro-setor" onchange="renderQuadroVagas()" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
         <option value="">Todos os Setores</option>
       </select>
+      <select id="qv-filtro-status" onchange="renderQuadroVagas()" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+        <option value="">Todos os status</option>
+        <option value="livre">Com vagas livres</option>
+        <option value="lotado">Lotados</option>
+        <option value="excedido">Excedidos</option>
+        <option value="semcadastro">Sem cadastro</option>
+      </select>
       <button class="btn btn-sm" onclick="abrirModalCargo()" style="background:var(--accent);color:#fff;border-color:var(--accent)">＋ Novo Cargo</button>
     </div>
   </div>
 
   <!-- KPIs gerais -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px" id="qv-kpis">
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px" id="qv-kpis">
     <div class="card" style="padding:12px;text-align:center">
       <div style="font-size:22px;font-weight:800;color:var(--accent)" id="qv-k-cargos">0</div>
       <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Cargos</div>
@@ -759,13 +766,32 @@ tbody tr:hover td{background:var(--bg)}
       <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Vagas Livres</div>
     </div>
     <div class="card" style="padding:12px;text-align:center">
-      <div style="font-size:22px;font-weight:800;color:#7c3aed" id="qv-k-folha">R$ 0</div>
-      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Custo Folha Bruta</div>
+      <div style="font-size:22px;font-weight:800;color:#dc2626" id="qv-k-excedidos">0</div>
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Excedidos</div>
+    </div>
+    <div class="card" style="padding:12px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:#d97706" id="qv-k-semcad">0</div>
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Sem Cadastro</div>
+    </div>
+    <div class="card" style="padding:12px;text-align:center">
+      <div style="font-size:20px;font-weight:800;color:#7c3aed" id="qv-k-folha">R$ 0</div>
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Folha Bruta</div>
     </div>
   </div>
 
-  <!-- Árvore de setores/cargos -->
-  <div id="qv-arvore"></div>
+  <!-- Alertas -->
+  <div id="qv-alertas" style="margin-bottom:16px"></div>
+
+  <!-- Abas -->
+  <div style="display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:16px">
+    <button id="qvtab-btn-painel" onclick="switchQvTab('painel')" style="padding:8px 14px;font-size:12px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid var(--accent);color:var(--accent)">📋 Painel por Cargo</button>
+    <button id="qvtab-btn-vagas" onclick="switchQvTab('vagas')" style="padding:8px 14px;font-size:12px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text2)">🟢 Vagas em Aberto</button>
+    <button id="qvtab-btn-folha" onclick="switchQvTab('folha')" style="padding:8px 14px;font-size:12px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text2)">💰 Custo por Setor</button>
+  </div>
+
+  <div id="qvtab-painel"></div>
+  <div id="qvtab-vagas" style="display:none"></div>
+  <div id="qvtab-folha" style="display:none"></div>
 
 </div>
 
@@ -1944,7 +1970,18 @@ tbody tr:hover td{background:var(--bg)}
           </select>
         </div>
         <div class="form-group"><label>Data de Admissão *</label><input type="date" id="f-admissao"></div>
-        <div class="form-group"><label>Cargo *</label><input type="text" id="f-cargo" placeholder="Ex: Operador de Produção" list="list-cargos"><datalist id="list-cargos"></datalist></div>
+        <div class="form-group"><label>Cargo *</label>
+          <select id="f-cargo-base" onchange="onCargoBaseChange()">
+            <option value="">Selecione o cargo...</option>
+          </select>
+        </div>
+        <div class="form-group" id="f-cargo-nivel-wrap" style="display:none"><label>Nível</label>
+          <select id="f-cargo-nivel" onchange="montarCargoFinal()">
+            <option value="">Sem nível</option>
+          </select>
+          <div id="f-cargo-nivel-sal" style="font-size:11px;color:var(--accent);margin-top:4px"></div>
+        </div>
+        <input type="hidden" id="f-cargo">
         <div class="form-group"><label>Setor *</label>
           <select id="f-setor"><option>Administração</option><option>Comercial</option><option>Compras</option><option>Empacotamento</option><option>Engenharia</option><option>Expedição</option><option>Financeiro</option><option>Logística</option><option>Manutenção</option><option>Produção</option><option>RH</option><option>Serviços Gerais</option><option>TI</option><option>Outro</option></select></div>
         <div class="form-group"><label>Turno</label>
@@ -1987,38 +2024,81 @@ tbody tr:hover td{background:var(--bg)}
 
 <!-- Modal Progressão de Cargo -->
 <div class="modal-overlay hidden" id="modal-progressao">
-  <div class="modal" style="max-width:560px">
+  <div class="modal" style="max-width:580px">
     <div class="modal-header">
-      <h3>📈 Registrar Progressão de Cargo</h3>
+      <h3>📈 Registrar Progressão</h3>
       <button class="modal-close" onclick="fecharModal('modal-progressao')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="prog-colab-id">
+
+      <!-- Situação atual -->
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;display:flex;gap:24px;flex-wrap:wrap">
         <div><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:2px">COLABORADOR</div><div style="font-size:13px;font-weight:700" id="prog-colab-nome">—</div></div>
         <div><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:2px">CARGO ATUAL</div><div style="font-size:13px;font-weight:600;color:var(--accent)" id="prog-cargo-atual">—</div></div>
         <div><div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:2px">SALÁRIO ATUAL</div><div style="font-size:13px" id="prog-salario-atual">—</div></div>
       </div>
-      <div class="form-grid">
+
+      <!-- Tipo de progressão -->
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Tipo de Progressão *</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;flex:1;min-width:140px" id="prog-tipo-horiz-label">
+            <input type="radio" name="prog-tipo" id="prog-tipo-horiz" value="horizontal" onchange="onProgTipoChange()" checked>
+            ↔️ Progressão de Nível<br><span style="font-size:10px;font-weight:400;color:var(--text3)">Mesmo cargo, nível diferente</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;flex:1;min-width:140px" id="prog-tipo-vert-label">
+            <input type="radio" name="prog-tipo" id="prog-tipo-vert" value="vertical" onchange="onProgTipoChange()">
+            ↑ Mudança de Cargo<br><span style="font-size:10px;font-weight:400;color:var(--text3)">Cargo e/ou setor diferente</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Progressão Horizontal: mesmo cargo, novo nível -->
+      <div id="prog-bloco-horiz" class="form-grid">
         <div class="form-group" style="grid-column:1/-1">
-          <label>Novo Cargo *</label>
-          <input type="text" id="prog-cargo-novo" placeholder="Digite ou selecione o novo cargo..." list="list-prog-cargos">
-          <datalist id="list-prog-cargos"></datalist>
+          <label>Novo Nível *</label>
+          <select id="prog-nivel-novo" onchange="onProgNivelChange()">
+            <option value="">Selecione o nível...</option>
+          </select>
+          <div id="prog-nivel-sal-info" style="font-size:11px;color:var(--accent);margin-top:4px"></div>
+        </div>
+      </div>
+
+      <!-- Progressão Vertical: novo cargo -->
+      <div id="prog-bloco-vert" class="form-grid" style="display:none">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Novo Cargo Base *</label>
+          <select id="prog-cargo-base-novo" onchange="onProgCargoBaseChange()">
+            <option value="">Selecione o cargo...</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1" id="prog-nivel-vert-wrap" style="display:none">
+          <label>Nível no Novo Cargo</label>
+          <select id="prog-nivel-vert" onchange="onProgNivelVertChange()">
+            <option value="">Sem nível</option>
+          </select>
+          <div id="prog-nivel-vert-sal" style="font-size:11px;color:var(--accent);margin-top:4px"></div>
+        </div>
+      </div>
+
+      <!-- Campos comuns -->
+      <div class="form-grid" style="margin-top:12px">
+        <div class="form-group">
+          <label>Salário após progressão (R$)</label>
+          <input type="number" id="prog-salario-novo" placeholder="Preenchido automaticamente" step="0.01" min="0">
         </div>
         <div class="form-group">
-          <label>Novo Salário (R$)</label>
-          <input type="number" id="prog-salario-novo" placeholder="Deixe em branco para manter" step="0.01" min="0">
-        </div>
-        <div class="form-group">
-          <label>Data da Alteração *</label>
+          <label>Data da Progressão *</label>
           <input type="date" id="prog-data">
         </div>
         <div class="form-group">
           <label>Motivo</label>
           <select id="prog-motivo">
+            <option>Progressão de Nível</option>
             <option>Promoção</option>
             <option>Transferência de Setor</option>
-            <option>Restruturação</option>
+            <option>Reestruturação</option>
             <option>Mérito</option>
             <option>Acordo Coletivo</option>
             <option>Outro</option>
@@ -2065,9 +2145,27 @@ tbody tr:hover td{background:var(--bg)}
       <div class="form-grid">
         <div class="form-group" style="grid-column:1/-1"><label>Nome do Cargo *</label><input type="text" id="cargo-nome" placeholder="Ex: Operador de Produção"></div>
         <div class="form-group"><label>Setor *</label><select id="cargo-setor"><option>Administração</option><option>Comercial</option><option>Compras</option><option>Empacotamento</option><option>Engenharia</option><option>Expedição</option><option>Financeiro</option><option>Logística</option><option>Manutenção</option><option>Produção</option><option>RH</option><option>Serviços Gerais</option><option>TI</option><option>Outro</option></select></div>
-        <div class="form-group"><label>Salário Base (R$)</label><input type="number" id="cargo-sal-base" placeholder="0,00" step="0.01"></div>
-        <div class="form-group"><label>Salário Máximo (R$)</label><input type="number" id="cargo-sal-max" placeholder="0,00" step="0.01"></div>
-        <div class="form-group"><label>Total de Vagas</label><input type="number" id="cargo-vagas" min="0" placeholder="Ex: 30" title="Deixe 0 ou vazio para ilimitado"></div>
+        <div class="form-group"><label>Salário Base — Nível 0 (R$)</label><input type="number" id="cargo-sal-base" placeholder="0,00" step="0.01" oninput="calcularTabelaNiveis()"></div>
+        <div class="form-group"><label>Total de Vagas do Cargo</label><input type="number" id="cargo-vagas" min="0" placeholder="Ex: 30" title="Total de vagas para este cargo em todos os níveis. Deixe 0 para ilimitado"></div>
+        <div class="form-group"><label>Níveis disponíveis</label>
+          <select id="cargo-nivel-max" onchange="calcularTabelaNiveis()">
+            <option value="0">Sem progressão (apenas Nível 0)</option>
+            <option value="1">Até Nível 1</option>
+            <option value="2">Até Nível 2</option>
+            <option value="3">Até Nível 3</option>
+            <option value="4">Até Nível 4</option>
+            <option value="5">Até Nível 5</option>
+            <option value="6">Até Nível 6</option>
+            <option value="7">Até Nível 7</option>
+            <option value="8">Até Nível 8</option>
+            <option value="9">Até Nível 9</option>
+            <option value="10">Até Nível 10</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1" id="cargo-tabela-niveis-wrap" style="display:none">
+          <label>Tabela salarial (5% por nível)</label>
+          <div id="cargo-tabela-niveis" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin-top:4px"></div>
+        </div>
         <div class="form-group" style="grid-column:1/-1"><label>Atribuições</label><textarea id="cargo-desc" rows="3" placeholder="Descreva as atribuições..."></textarea></div>
         <div class="form-group" style="grid-column:1/-1"><label>Requisitos</label><textarea id="cargo-req" rows="2" placeholder="Ex: Ensino médio completo..."></textarea></div>
       </div>
@@ -2425,7 +2523,9 @@ function renderDashboard(){
 // ══════════════════════════════════════════
 function renderColabs(lista){
   const src=lista||getColaboradoresFiltrados();
-  document.getElementById('list-cargos').innerHTML=DB.cargos.map(c=>`<option value="${c.nome}">`).join('');
+  const dlc=document.getElementById('list-cargos');
+  if(dlc)dlc.innerHTML=DB.cargos.map(c=>`<option value="${c.nome}">`).join('');
+  popularSelectsCargo();
 
   // Popular filtro de setores dinamicamente com os setores reais cadastrados
   const sel=document.getElementById('filtro-setor-colab');
@@ -2470,17 +2570,25 @@ function filtrarColabs(){
 }
 function abrirModalColab(id){
   document.getElementById('modal-colab-title').textContent=id?'Editar Colaborador':'Novo Colaborador';
-  ['nome','cpf','rg','telefone','email','endereco','emerg-nome','emerg-tel','cargo','salario','ctps','banco','agencia','conta','pix'].forEach(f=>{const el=document.getElementById('f-'+f);if(el)el.value='';});
+  ['nome','cpf','rg','telefone','email','endereco','emerg-nome','emerg-tel','salario','ctps','banco','agencia','conta','pix'].forEach(f=>{const el=document.getElementById('f-'+f);if(el)el.value='';});
+  document.getElementById('f-cargo').value='';
   document.getElementById('f-sexo').value='';
   document.getElementById('f-pix-tipo').value='';
   document.getElementById('f-pix').placeholder='Selecione o tipo ao lado';
   const fph=document.getElementById('f-pix-hint');if(fph)fph.textContent='';
   document.getElementById('f-empresa').value='Explosão Alimentos';
   ['nascimento','admissao','aso'].forEach(f=>{const el=document.getElementById('f-'+f);if(el)el.value='';});
+  // Popula select de cargo base
+  popularSelectsCargo();
+  // Limpa seleção de cargo
+  document.getElementById('f-cargo-base').value='';
+  document.getElementById('f-cargo-nivel').innerHTML='<option value="">Sem nível</option>';
+  document.getElementById('f-cargo-nivel-wrap').style.display='none';
+  document.getElementById('f-cargo-nivel-sal').textContent='';
   if(id){
     const c=DB.colaboradores.find(x=>x.id==id);
     if(c){
-      const fs={'nome':c.nome,'cpf':c.cpf,'rg':c.rg,'nascimento':normalizarData(c.nascimento),'telefone':c.telefone,'email':c.email,'endereco':c.endereco,'emerg-nome':c.emergNome,'emerg-tel':c.emergTel,'admissao':normalizarData(c.admissao),'cargo':c.cargo,'salario':c.salario,'ctps':c.ctps,'aso':normalizarData(c.aso),'banco':c.banco,'agencia':c.agencia,'conta':c.conta};
+      const fs={'nome':c.nome,'cpf':c.cpf,'rg':c.rg,'nascimento':normalizarData(c.nascimento),'telefone':c.telefone,'email':c.email,'endereco':c.endereco,'emerg-nome':c.emergNome,'emerg-tel':c.emergTel,'admissao':normalizarData(c.admissao),'salario':c.salario,'ctps':c.ctps,'aso':normalizarData(c.aso),'banco':c.banco,'agencia':c.agencia,'conta':c.conta};
       if(c.empresa)document.getElementById('f-empresa').value=c.empresa;
       Object.entries(fs).forEach(([k,v])=>{const el=document.getElementById('f-'+k);if(el&&v!=null&&v!=='')el.value=v;});
       document.getElementById('f-pix-tipo').value='';
@@ -2492,6 +2600,8 @@ function abrirModalColab(id){
       if(c.contrato)document.getElementById('f-contrato').value=c.contrato;
       if(c.status)document.getElementById('f-status').value=c.status;
       if(c.tipoConta)document.getElementById('f-tipo-conta').value=c.tipoConta;
+      // Carrega cargo + nível no select encadeado
+      if(c.cargo)carregarCargoNoSelect(c.cargo);
     }
     document.getElementById('btn-salvar-colab').onclick=()=>salvarColaborador(id);
   } else {
@@ -2501,6 +2611,104 @@ function abrirModalColab(id){
   abrirModal('modal-colab');
 }
 function editarColab(id){abrirModalColab(id);}
+
+// Popula o select de cargos base com todos os cargos cadastrados
+function popularSelectsCargo(){
+  const sel=document.getElementById('f-cargo-base');
+  if(!sel)return;
+  const atual=sel.value;
+  sel.innerHTML='<option value="">Selecione o cargo...</option>'+
+    DB.cargos.slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR')).map(c=>
+      `<option value="${c.id}">${c.nome}</option>`
+    ).join('');
+  if(atual)sel.value=atual;
+  // Mantém datalist para compatibilidade
+  const dl=document.getElementById('list-cargos');
+  if(dl)dl.innerHTML=DB.cargos.map(c=>`<option value="${c.nome}">`).join('');
+}
+
+// Quando seleciona o cargo base — popula o select de níveis
+function onCargoBaseChange(){
+  const cargoId=document.getElementById('f-cargo-base').value;
+  const cargo=DB.cargos.find(c=>c.id==cargoId);
+  const wrap=document.getElementById('f-cargo-nivel-wrap');
+  const selNivel=document.getElementById('f-cargo-nivel');
+  selNivel.innerHTML='<option value="">Sem nível</option>';
+  document.getElementById('f-cargo-nivel-sal').textContent='';
+  if(!cargo){wrap.style.display='none';document.getElementById('f-cargo').value='';return;}
+  const nivelMax=parseInt(cargo.nivel);
+  const nivelMaxOk=isNaN(nivelMax)?0:nivelMax;
+  if(nivelMaxOk>=0){
+    wrap.style.display='block';
+    for(var n=0;n<=nivelMaxOk;n++){
+      const sal=parseFloat(cargo.salBase||0)*Math.pow(1.05,n);
+      const opt=document.createElement('option');
+      opt.value=n;
+      opt.textContent='Nível '+n+(sal?' — '+fmtMoeda(sal):'');
+      opt.dataset.sal=sal.toFixed(2);
+      selNivel.appendChild(opt);
+    }
+    if(nivelMaxOk===0)wrap.style.display='none';
+  } else {
+    wrap.style.display='none';
+  }
+  montarCargoFinal();
+}
+
+// Monta o nome final do cargo e atualiza salário automaticamente
+function montarCargoFinal(){
+  const cargoId=document.getElementById('f-cargo-base').value;
+  const cargo=DB.cargos.find(c=>c.id==cargoId);
+  if(!cargo){document.getElementById('f-cargo').value='';return;}
+  const nivel=document.getElementById('f-cargo-nivel').value;
+  const nomeFinal=nivel?cargo.nome+', Nível '+nivel:cargo.nome;
+  document.getElementById('f-cargo').value=nomeFinal;
+  // Atualiza setor automaticamente
+  const selSetor=document.getElementById('f-setor');
+  if(selSetor&&cargo.setor)selSetor.value=cargo.setor;
+  // Mostra e atualiza salário sugerido
+  if(nivel!==null&&nivel!==''){
+    const sal=parseFloat(cargo.salBase||0)*Math.pow(1.05,parseInt(nivel));
+    const salEl=document.getElementById('f-cargo-nivel-sal');
+    if(sal>0){
+      salEl.textContent='💰 Salário Nível '+nivel+': '+fmtMoeda(sal);
+      const salInput=document.getElementById('f-salario');
+      if(salInput)salInput.value=sal.toFixed(2); // sempre atualiza
+    }
+  } else {
+    document.getElementById('f-cargo-nivel-sal').textContent='';
+  }
+}
+
+// Carrega cargo no select encadeado ao editar colaborador
+function carregarCargoNoSelect(cargoStr){
+  if(!cargoStr)return;
+  // Detecta padrão "Nome do Cargo, Nível N"
+  const matchNivel=cargoStr.match(/^(.+),\s*Nível\s*(\d+)$/i);
+  const nomeBase=matchNivel?matchNivel[1].trim():cargoStr.trim();
+  const nivel=matchNivel?parseInt(matchNivel[2]):null;
+  // Busca cargo cadastrado pelo nome base
+  const cargo=DB.cargos.find(c=>String(c.nome||'').trim().toLowerCase()===nomeBase.toLowerCase());
+  if(cargo){
+    document.getElementById('f-cargo-base').value=cargo.id;
+    onCargoBaseChange();
+    // nivel !== null cobre o caso 0 (que era tratado como falso antes)
+    if(nivel!==null){
+      setTimeout(()=>{
+        document.getElementById('f-cargo-nivel').value=nivel;
+        montarCargoFinal();
+      },10);
+    }
+  } else {
+    document.getElementById('f-cargo').value=cargoStr;
+    const sel=document.getElementById('f-cargo-base');
+    const opt=document.createElement('option');
+    opt.value='__raw__';
+    opt.textContent='⚠️ '+cargoStr+' (não cadastrado)';
+    sel.appendChild(opt);
+    sel.value='__raw__';
+  }
+}
 // ══════════════════════════════════════════
 // NORMALIZAÇÃO DE TELEFONE
 // ══════════════════════════════════════════
@@ -2724,37 +2932,108 @@ function salvarFerias(){
 // ══════════════════════════════════════════
 function renderCarreira(){
   document.getElementById('body-cargos').innerHTML=DB.cargos.length?DB.cargos.map(c=>{
-    const n=DB.colaboradores.filter(x=>x.cargo===c.nome&&x.status!=='Desligado').length;
+    const nivelMax=parseInt(c.nivel)||1;
+    const salBase=parseFloat(c.salBase)||0;
+    const salMax=salBase>0?salBase*Math.pow(1.05,nivelMax-1):parseFloat(c.salMax)||0;
+    // Conta colaboradores em todos os níveis deste cargo base
+    const n=DB.colaboradores.filter(x=>{
+      if(x.status==='Desligado')return false;
+      const base=String(x.cargo||'').replace(/,\s*Nível\s*\d+$/i,'').trim();
+      return base.toLowerCase()===String(c.nome||'').trim().toLowerCase();
+    }).length;
     return`<tr>
       <td class="td-nome" data-label="">${c.nome}</td>
-      <td data-label="Setor">${c.setor}</td>
-      <td data-label="Sal. Base">${c.salBase?'R$ '+Number(c.salBase).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
-      <td data-label="Sal. Máx">${c.salMax?'R$ '+Number(c.salMax).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
+      <td data-label="Setor">${c.setor||'—'}</td>
+      <td data-label="Sal. Base">${salBase?'R$ '+salBase.toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
+      <td data-label="Níveis"><span class="badge b-info">N0${nivelMax>0?' → N'+nivelMax:''}</span></td>
+      <td data-label="Sal. Máx">${salMax?'R$ '+salMax.toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
+      <td data-label="Vagas/Nível">${c.vagas?c.vagas+' vagas':'—'}</td>
       <td data-label="Colaboradores"><span class="badge b-info">${n}</span></td>
       <td data-label="Ações"><button class="btn btn-sm" onclick="editarCargo('${c.id}')">✏️ Editar</button></td>
     </tr>`;
-  }).join(''):'<tr><td colspan="6" class="empty">Nenhum cargo cadastrado.</td></tr>';
+  }).join(''):'<tr><td colspan="8" class="empty">Nenhum cargo cadastrado.</td></tr>';
   renderProgressao();
 }
 function abrirModalCargo(id){
   document.getElementById('modal-cargo-title').textContent=id?'Editar Cargo':'Novo Cargo';
   ['nome','desc','req'].forEach(f=>{const el=document.getElementById('cargo-'+f);if(el)el.value='';});
-  ['sal-base','sal-max'].forEach(f=>{const el=document.getElementById('cargo-'+f);if(el)el.value='';});
-  const vagasEl=document.getElementById('cargo-vagas');if(vagasEl)vagasEl.value='';
-  if(id){const c=DB.cargos.find(x=>x.id==id);if(c){document.getElementById('cargo-nome').value=c.nome;document.getElementById('cargo-setor').value=c.setor;document.getElementById('cargo-sal-base').value=c.salBase;document.getElementById('cargo-sal-max').value=c.salMax;document.getElementById('cargo-desc').value=c.desc||'';document.getElementById('cargo-req').value=c.req||'';if(vagasEl)vagasEl.value=c.vagas||'';}
+  document.getElementById('cargo-sal-base').value='';
+  document.getElementById('cargo-vagas').value='';
+  document.getElementById('cargo-nivel-max').value='0';
+  document.getElementById('cargo-tabela-niveis').innerHTML='';
+  if(id){
+    const c=DB.cargos.find(x=>x.id==id);
+    if(c){
+      document.getElementById('cargo-nome').value=c.nome;
+      document.getElementById('cargo-setor').value=c.setor||'';
+      document.getElementById('cargo-sal-base').value=c.salBase||'';
+      document.getElementById('cargo-vagas').value=c.vagas||'';
+      document.getElementById('cargo-nivel-max').value=c.nivel||'1';
+      document.getElementById('cargo-desc').value=c.desc||'';
+      document.getElementById('cargo-req').value=c.req||'';
+      calcularTabelaNiveis();
+    }
     document.getElementById('btn-salvar-cargo').onclick=()=>salvarCargo(id);
-  }else document.getElementById('btn-salvar-cargo').onclick=()=>salvarCargo();
+  } else {
+    document.getElementById('btn-salvar-cargo').onclick=()=>salvarCargo();
+  }
   abrirModal('modal-cargo');
 }
 function editarCargo(id){abrirModalCargo(id);}
+
+function calcularTabelaNiveis(){
+  var base=parseSalario(document.getElementById('cargo-sal-base').value)||0;
+  var max=parseInt(document.getElementById('cargo-nivel-max').value);
+  if(isNaN(max))max=0;
+  var wrap=document.getElementById('cargo-tabela-niveis-wrap');
+  var el=document.getElementById('cargo-tabela-niveis');
+  if(!base){if(wrap)wrap.style.display='none';el.innerHTML='';return;}
+  if(wrap)wrap.style.display='block';
+  var html='';
+  for(var n=0;n<=max;n++){
+    var sal=base*Math.pow(1.05,n); // N0=base×1.05^0=base, N1=base×1.05^1, etc.
+    var pct=n*5;
+    var cor=n===0?'#1a5c38':n===max?'#7c3aed':'#2563eb';
+    html+='<div style="padding:6px 8px;border-radius:var(--radius-sm);border:1px solid '+cor+'22;background:'+cor+'11;text-align:center">'
+      +'<div style="font-size:10px;font-weight:700;color:'+cor+'">Nível '+n+'</div>'
+      +'<div style="font-size:11px;font-weight:600;color:var(--text)">'+fmtMoeda(sal)+'</div>'
+      +(n>0?'<div style="font-size:9px;color:var(--text3)">+'+pct+'%</div>':'<div style="font-size:9px;color:var(--text3)">base</div>')
+      +'</div>';
+  }
+  el.innerHTML=html;
+  // Salário máximo = nível máximo
+  var salMax=base*Math.pow(1.05,max);
+  var elMax=document.getElementById('cargo-sal-max');
+  if(elMax)elMax.value=salMax.toFixed(2);
+}
+
 function salvarCargo(editId){
   const nome=document.getElementById('cargo-nome').value.trim();
   if(!nome){notify('Nome obrigatório','error');return;}
   const vagasEl=document.getElementById('cargo-vagas');
-  const obj={id:editId||gerarId(),nome,setor:document.getElementById('cargo-setor').value,salBase:document.getElementById('cargo-sal-base').value,salMax:document.getElementById('cargo-sal-max').value,desc:document.getElementById('cargo-desc').value.trim(),req:document.getElementById('cargo-req').value.trim(),vagas:vagasEl?parseInt(vagasEl.value)||0:0};
+  const nivelMax=parseInt(document.getElementById('cargo-nivel-max').value);
+  const nivelMaxOk=isNaN(nivelMax)?0:nivelMax;
+  // parseSalario lida corretamente com formato BR (vírgula) e US (ponto)
+  const salBase=parseSalario(document.getElementById('cargo-sal-base').value)||0;
+  const salMax=salBase>0?salBase*Math.pow(1.05,nivelMaxOk):0;
+  const obj={
+    id:editId||gerarId(),
+    nome,
+    setor:document.getElementById('cargo-setor').value,
+    salBase:salBase?salBase.toFixed(2):'',   // sempre ponto decimal, sem vírgula
+    salMax:salMax?salMax.toFixed(2):'',       // sempre ponto decimal, sem vírgula
+    nivel:nivelMaxOk,
+    vagas:vagasEl?parseInt(vagasEl.value)||0:0,
+    desc:document.getElementById('cargo-desc').value.trim(),
+    req:document.getElementById('cargo-req').value.trim()
+  };
   if(editId){const i=DB.cargos.findIndex(c=>c.id==editId);DB.cargos[i]=obj;}else DB.cargos.push(obj);
-  salvarDB();fecharModal('modal-cargo');renderCarreira();renderQuadroVagas&&renderQuadroVagas();notify(editId?'Cargo atualizado!':'Cargo cadastrado!');
+  salvarDB();fecharModal('modal-cargo');renderCarreira();
+  if(typeof renderQuadroVagas==='function')renderQuadroVagas();
+  notify(editId?'Cargo atualizado!':'Cargo cadastrado!');
   sincronizarScript(editId?'editarCargo':'novoCargo',obj);
+  // Repopula selects de cargo nos formulários
+  popularSelectsCargo();
 }
 function renderProgressao(q){
   let colabs=DB.colaboradores.filter(c=>c.status!=='Desligado');
@@ -2792,43 +3071,175 @@ function abrirModalProgressao(colabId){
   document.getElementById('prog-colab-id').value=colabId;
   document.getElementById('prog-colab-nome').textContent=c.nome;
   document.getElementById('prog-cargo-atual').textContent=c.cargo||'—';
-  document.getElementById('prog-salario-atual').textContent=c.salario?'R$ '+Number(c.salario).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—';
-  // populate cargo datalist
-  const dl=document.getElementById('list-prog-cargos');
-  dl.innerHTML=DB.cargos.map(g=>`<option value="${g.nome}">`).join('');
-  document.getElementById('prog-cargo-novo').value='';
+  document.getElementById('prog-salario-atual').textContent=c.salario?fmtMoeda(parseSalario(c.salario)):'—';
   document.getElementById('prog-salario-novo').value='';
   document.getElementById('prog-data').value=hoje();
-  document.getElementById('prog-motivo').value='Promoção';
   document.getElementById('prog-obs').value='';
+
+  // Detecta cargo base e nível atual
+  const matchAtual=(c.cargo||'').match(/^(.+),\s*Nível\s*(\d+)$/i);
+  const nomeBaseAtual=matchAtual?matchAtual[1].trim():(c.cargo||'').trim();
+  const nivelAtual=matchAtual?parseInt(matchAtual[2]):null;
+  const cargoAtualReg=DB.cargos.find(x=>x.nome.trim().toLowerCase()===nomeBaseAtual.toLowerCase());
+  const nivelMaxAtual=cargoAtualReg?parseInt(cargoAtualReg.nivel)||0:0;
+
+  // Popula select de novo cargo base (vertical)
+  const selBase=document.getElementById('prog-cargo-base-novo');
+  selBase.innerHTML='<option value="">Selecione o cargo...</option>'+
+    DB.cargos.slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'))
+      .map(g=>`<option value="${g.id}">${g.nome}</option>`).join('');
+
+  // Popula níveis disponíveis para progressão horizontal
+  const selNivel=document.getElementById('prog-nivel-novo');
+  selNivel.innerHTML='<option value="">Selecione o nível...</option>';
+  if(cargoAtualReg&&nivelMaxAtual>0){
+    for(let n=0;n<=nivelMaxAtual;n++){
+      const sal=parseSalario(cargoAtualReg.salBase)*Math.pow(1.05,n);
+      const opt=document.createElement('option');
+      opt.value=n;
+      opt.textContent='Nível '+n+' — '+fmtMoeda(sal)+(n===nivelAtual?' (atual)':'');
+      opt.disabled=(n===nivelAtual); // não pode selecionar o mesmo nível
+      selNivel.appendChild(opt);
+    }
+  } else {
+    selNivel.innerHTML='<option value="">Sem níveis configurados para este cargo</option>';
+  }
+  document.getElementById('prog-nivel-sal-info').textContent='';
+
+  // Define tipo padrão
+  document.getElementById('prog-tipo-horiz').checked=true;
+  document.getElementById('prog-motivo').value='Progressão de Nível';
+  onProgTipoChange();
   abrirModal('modal-progressao');
 }
+
+function onProgTipoChange(){
+  const horiz=document.getElementById('prog-tipo-horiz').checked;
+  document.getElementById('prog-bloco-horiz').style.display=horiz?'grid':'none';
+  document.getElementById('prog-bloco-vert').style.display=horiz?'none':'grid';
+  // Estilo dos labels
+  document.getElementById('prog-tipo-horiz-label').style.borderColor=horiz?'var(--accent)':'var(--border)';
+  document.getElementById('prog-tipo-vert-label').style.borderColor=!horiz?'var(--accent)':'var(--border)';
+  document.getElementById('prog-motivo').value=horiz?'Progressão de Nível':'Promoção';
+  document.getElementById('prog-salario-novo').value='';
+}
+
+function onProgNivelChange(){
+  const colabId=document.getElementById('prog-colab-id').value;
+  const c=DB.colaboradores.find(x=>x.id==colabId);
+  if(!c)return;
+  const matchAtual=(c.cargo||'').match(/^(.+),\s*Nível\s*(\d+)$/i);
+  const nomeBaseAtual=matchAtual?matchAtual[1].trim():(c.cargo||'').trim();
+  const cargoReg=DB.cargos.find(x=>x.nome.trim().toLowerCase()===nomeBaseAtual.toLowerCase());
+  const nivel=document.getElementById('prog-nivel-novo').value;
+  if(nivel===''||!cargoReg){document.getElementById('prog-nivel-sal-info').textContent='';return;}
+  const sal=parseSalario(cargoReg.salBase)*Math.pow(1.05,parseInt(nivel));
+  document.getElementById('prog-nivel-sal-info').textContent='💰 Salário Nível '+nivel+': '+fmtMoeda(sal);
+  document.getElementById('prog-salario-novo').value=sal.toFixed(2);
+}
+
+function onProgCargoBaseChange(){
+  const cargoId=document.getElementById('prog-cargo-base-novo').value;
+  const cargo=DB.cargos.find(c=>c.id==cargoId);
+  const wrap=document.getElementById('prog-nivel-vert-wrap');
+  const selNivel=document.getElementById('prog-nivel-vert');
+  selNivel.innerHTML='<option value="">Sem nível</option>';
+  document.getElementById('prog-nivel-vert-sal').textContent='';
+  document.getElementById('prog-salario-novo').value='';
+  if(!cargo){wrap.style.display='none';return;}
+  const nivelMax=parseInt(cargo.nivel)||0;
+  if(nivelMax>0){
+    wrap.style.display='block';
+    for(let n=0;n<=nivelMax;n++){
+      const sal=parseSalario(cargo.salBase)*Math.pow(1.05,n);
+      const opt=document.createElement('option');
+      opt.value=n;
+      opt.textContent='Nível '+n+' — '+fmtMoeda(sal);
+      selNivel.appendChild(opt);
+    }
+  } else {
+    wrap.style.display='none';
+    // Preenche salário base automaticamente
+    const sal=parseSalario(cargo.salBase);
+    if(sal>0)document.getElementById('prog-salario-novo').value=sal.toFixed(2);
+  }
+}
+
+function onProgNivelVertChange(){
+  const cargoId=document.getElementById('prog-cargo-base-novo').value;
+  const cargo=DB.cargos.find(c=>c.id==cargoId);
+  if(!cargo)return;
+  const nivel=document.getElementById('prog-nivel-vert').value;
+  const n=nivel!==''?parseInt(nivel):0;
+  const sal=parseSalario(cargo.salBase)*Math.pow(1.05,n);
+  document.getElementById('prog-nivel-vert-sal').textContent='💰 Salário: '+fmtMoeda(sal);
+  document.getElementById('prog-salario-novo').value=sal.toFixed(2);
+}
+
 function salvarProgressao(){
   const colabId=document.getElementById('prog-colab-id').value;
-  const cargoNovo=document.getElementById('prog-cargo-novo').value.trim();
   const data=document.getElementById('prog-data').value;
-  if(!colabId||!cargoNovo||!data){notify('Preencha novo cargo e data','error');return;}
   const c=DB.colaboradores.find(x=>x.id==colabId);
-  if(!c){notify('Colaborador não encontrado','error');return;}
+  if(!c||!data){notify('Preencha a data','error');return;}
+
+  const horiz=document.getElementById('prog-tipo-horiz').checked;
+  let cargoNovo,setorNovo;
+
+  if(horiz){
+    // Progressão horizontal — mesmo cargo, novo nível
+    const nivel=document.getElementById('prog-nivel-novo').value;
+    if(nivel===''){notify('Selecione o nível','error');return;}
+    const matchAtual=(c.cargo||'').match(/^(.+),\s*Nível\s*(\d+)$/i);
+    const nomeBase=matchAtual?matchAtual[1].trim():(c.cargo||'').trim();
+    const nivelMaxReg=DB.cargos.find(x=>x.nome.trim().toLowerCase()===nomeBase.toLowerCase());
+    cargoNovo=parseInt(nivel)===0?nomeBase:nomeBase+', Nível '+nivel;
+    setorNovo=nivelMaxReg?nivelMaxReg.setor:c.setor;
+  } else {
+    // Progressão vertical — novo cargo
+    const cargoId=document.getElementById('prog-cargo-base-novo').value;
+    const cargo=DB.cargos.find(x=>x.id==cargoId);
+    if(!cargo){notify('Selecione o novo cargo','error');return;}
+    const nivel=document.getElementById('prog-nivel-vert').value;
+    const nivelMaxOk=parseInt(cargo.nivel)||0;
+    if(nivel!==''&&nivelMaxOk>0){
+      const n=parseInt(nivel);
+      cargoNovo=n===0?cargo.nome:cargo.nome+', Nível '+n;
+    } else {
+      cargoNovo=cargo.nome;
+    }
+    setorNovo=cargo.setor||c.setor;
+  }
+
   const salarioNovo=parseFloat(document.getElementById('prog-salario-novo').value)||null;
   const reg={
-    id:gerarId(),colaboradorId:colabId,
-    cargoAnterior:c.cargo,salarioAnterior:c.salario,
-    cargoNovo,salarioNovo:salarioNovo||c.salario,
-    data,motivo:document.getElementById('prog-motivo').value,
+    id:gerarId(),
+    colaboradorId:colabId,
+    cargoAnterior:c.cargo,
+    salarioAnterior:c.salario,
+    cargoNovo,
+    salarioNovo:salarioNovo||c.salario,
+    tipo:horiz?'Progressão de Nível':'Mudança de Cargo',
+    data,
+    motivo:document.getElementById('prog-motivo').value,
     obs:document.getElementById('prog-obs').value.trim(),
     registradoEm:hoje()
   };
+
   DB.historico_cargo.push(reg);
-  // update colab
   const idx=DB.colaboradores.findIndex(x=>x.id==colabId);
   DB.colaboradores[idx].cargo=cargoNovo;
+  if(setorNovo)DB.colaboradores[idx].setor=setorNovo;
   if(salarioNovo)DB.colaboradores[idx].salario=salarioNovo;
-  salvarDB();fecharModal('modal-progressao');
+
+  salvarDB();
+  sincronizarScript('progressaoCargo',reg);
+  // Atualiza colaborador no Sheets também
+  sincronizarScript('editarColaborador',DB.colaboradores[idx]);
+
+  fecharModal('modal-progressao');
   renderProgressao(document.getElementById('busca-progressao').value);
   renderColabs();
-  notify(`Cargo de ${c.nome} atualizado para ${cargoNovo}!`);
-  sincronizarScript('progressaoCargo',reg);
+  notify(`✅ ${c.nome} → ${cargoNovo}`+(salarioNovo?' · '+fmtMoeda(salarioNovo):''));
 }
 
 // ══════════════════════════════════════════
@@ -8537,6 +8948,7 @@ function gerarRelatorioAtestados() {
 function renderQuadroVagas(){
   var empFiltro=document.getElementById('qv-filtro-empresa')?.value||'';
   var setorFiltro=document.getElementById('qv-filtro-setor')?.value||'';
+  var statusFiltro=document.getElementById('qv-filtro-status')?.value||'';
 
   // Colaboradores ativos
   var ativos=DB.colaboradores.filter(function(c){
@@ -8545,142 +8957,308 @@ function renderQuadroVagas(){
     return true;
   });
 
-  // Mapa de cargos pelo nome
+  function nb(str){return String(str||'').replace(/,\s*Nível\s*\d+$/i,'').trim();}
   var cargoMap={};
-  DB.cargos.forEach(function(c){cargoMap[String(c.nome||'').trim()]=c;});
+  DB.cargos.forEach(function(c){cargoMap[String(c.nome||'').trim().toLowerCase()]=c;});
 
-  // Descobre setor do cargo usando colaboradores como fonte primária
-  function getSetorDoCargo(nomeCargo){
-    var sample=ativos.find(function(c){return String(c.cargo||'').trim()===nomeCargo;});
-    if(sample&&sample.setor)return String(sample.setor).trim();
-    var reg=cargoMap[nomeCargo];
-    return reg&&reg.setor?String(reg.setor).trim():'Sem Setor';
+  function getSetor(nomeCargo){
+    var base=nomeCargo.toLowerCase();
+    var s=ativos.find(function(c){return nb(c.cargo).toLowerCase()===base;});
+    if(s&&s.setor)return String(s.setor).trim();
+    var r=cargoMap[base];
+    return r&&r.setor?String(r.setor).trim():'Sem Setor';
   }
 
-  // União de cargos cadastrados + cargos em uso pelos colaboradores
-  var nomesCargosCad=DB.cargos.map(function(c){return String(c.nome||'').trim();});
-  var nomesColabs=[...new Set(ativos.map(function(c){return String(c.cargo||'').trim();}).filter(Boolean))];
-  var todosNomes=[...new Set([...nomesCargosCad,...nomesColabs])].filter(Boolean).sort();
+  // Monta lista completa de cargos base
+  var cad=DB.cargos.map(function(c){return String(c.nome||'').trim();});
+  var emUso=[...new Set(ativos.map(function(c){return nb(c.cargo);}).filter(Boolean))];
+  var todos=[...new Set([...cad,...emUso])].filter(Boolean).sort();
 
   // Popula filtro de setores
-  var setoresUnion=[...new Set(todosNomes.map(getSetorDoCargo))].sort();
+  var setoresAll=[...new Set(todos.map(getSetor))].sort();
   var selSetor=document.getElementById('qv-filtro-setor');
   if(selSetor){
-    var curVal=selSetor.value;
+    var cv=selSetor.value;
     selSetor.innerHTML='<option value="">Todos os Setores</option>'+
-      setoresUnion.map(function(s){return'<option value="'+s+'"'+(s===curVal?' selected':'')+'>'+s+'</option>';}).join('');
+      setoresAll.map(function(s){return'<option value="'+s+'"'+(s===cv?' selected':'')+'>'+s+'</option>';}).join('');
   }
 
-  // Filtra por setor
-  if(setorFiltro)todosNomes=todosNomes.filter(function(n){return getSetorDoCargo(n)===setorFiltro;});
+  // Calcula dados de cada cargo
+  var dadosCargos=todos.map(function(nome){
+    var reg=cargoMap[nome.toLowerCase()];
+    var colabs=ativos.filter(function(c){return nb(c.cargo).toLowerCase()===nome.toLowerCase();});
+    var ocup=colabs.length;
+    var vagas=reg?parseInt(reg.vagas)||0:0;
+    var livres=vagas>0?vagas-ocup:0;
+    var excedido=vagas>0&&ocup>vagas;
+    var semCad=!reg;
+    var setor=getSetor(nome);
+    var folha=colabs.reduce(function(s,c){return s+(parseSalario(c.salario)||0);},0);
+    return{nome,reg,colabs,ocup,vagas,livres,excedido,semCad,setor,folha};
+  });
+
+  // Aplica filtros
+  var filtrado=dadosCargos.filter(function(d){
+    if(setorFiltro&&d.setor!==setorFiltro)return false;
+    if(statusFiltro==='livre'&&!(d.vagas>0&&d.livres>0))return false;
+    if(statusFiltro==='lotado'&&!(d.vagas>0&&d.livres===0&&!d.excedido))return false;
+    if(statusFiltro==='excedido'&&!d.excedido)return false;
+    if(statusFiltro==='semcadastro'&&!d.semCad)return false;
+    return true;
+  });
 
   // KPIs
-  var totalVagas=0,totalLivres=0,totalFolha=0;
-  todosNomes.forEach(function(nome){
-    var reg=cargoMap[nome];
-    var ocup=ativos.filter(function(c){return String(c.cargo||'').trim()===nome;}).length;
-    var vagas=reg?parseInt(reg.vagas)||0:0;
-    totalVagas+=vagas;
-    if(vagas>0)totalLivres+=Math.max(0,vagas-ocup);
+  var totalVagas=0,totalLivres=0,totalExcedidos=0,totalSemCad=0,totalFolha=0;
+  dadosCargos.forEach(function(d){
+    totalVagas+=d.vagas;
+    if(d.vagas>0&&d.livres>0)totalLivres+=d.livres;
+    if(d.excedido)totalExcedidos++;
+    if(d.semCad)totalSemCad++;
+    totalFolha+=d.folha;
   });
-  ativos.forEach(function(c){totalFolha+=parseSalario(c.salario)||0;});
-  document.getElementById('qv-k-cargos').textContent=todosNomes.length;
+  document.getElementById('qv-k-cargos').textContent=dadosCargos.length;
   document.getElementById('qv-k-vagas').textContent=totalVagas||'∞';
-  document.getElementById('qv-k-livres').textContent=totalVagas?totalLivres:'—';
+  document.getElementById('qv-k-livres').textContent=totalLivres;
+  document.getElementById('qv-k-excedidos').textContent=totalExcedidos;
+  document.getElementById('qv-k-semcad').textContent=totalSemCad;
   document.getElementById('qv-k-folha').textContent=fmtMoeda(totalFolha);
+
+  // Alertas gerenciais
+  var alertasEl=document.getElementById('qv-alertas');
+  var alertas=[];
+  dadosCargos.forEach(function(d){
+    if(d.excedido)alertas.push({tipo:'danger',icon:'🚨',msg:'<b>'+d.nome+'</b> ('+d.setor+') — '+d.ocup+' colaboradores para '+d.vagas+' vagas · excedente de '+(d.ocup-d.vagas)});
+    if(d.semCad)alertas.push({tipo:'warn',icon:'⚠️',msg:'<b>'+d.nome+'</b> ('+d.setor+') — cargo em uso mas não cadastrado formalmente'});
+    if(d.vagas>0&&d.livres>0)alertas.push({tipo:'info',icon:'🟢',msg:'<b>'+d.nome+'</b> ('+d.setor+') — '+d.livres+' vaga(s) em aberto'});
+  });
+  if(!alertas.length){alertasEl.innerHTML='';
+  } else {
+    alertasEl.innerHTML='<div class="card" style="padding:12px 16px;margin-bottom:0">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔔 Situação Atual</div>'
+      +'<div style="display:flex;flex-direction:column;gap:5px">'
+      +alertas.map(function(a){
+        var bg=a.tipo==='danger'?'#fee2e2':a.tipo==='warn'?'#fef9c3':'#dcfce7';
+        var cor=a.tipo==='danger'?'#b91c1c':a.tipo==='warn'?'#92400e':'#166534';
+        return'<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:'+bg+';border-radius:6px">'
+          +'<span style="font-size:14px">'+a.icon+'</span>'
+          +'<span style="font-size:12px;color:'+cor+'">'+a.msg+'</span>'
+          +'</div>';
+      }).join('')+'</div></div>';
+  }
 
   // Agrupa por setor
   var porSetor={};
-  todosNomes.forEach(function(nome){
-    var s=getSetorDoCargo(nome);
-    if(!porSetor[s])porSetor[s]=[];
-    porSetor[s].push(nome);
+  filtrado.forEach(function(d){
+    if(!porSetor[d.setor])porSetor[d.setor]=[];
+    porSetor[d.setor].push(d);
   });
 
-  var arvore=document.getElementById('qv-arvore');
-  if(!arvore)return;
-  if(!Object.keys(porSetor).length){
-    arvore.innerHTML='<div class="card"><div class="empty">Nenhum cargo encontrado.</div></div>';
-    return;
+  // Tab painel — árvore por cargo
+  function renderPainel(){
+    if(!Object.keys(porSetor).length)
+      return'<div class="card"><div class="empty">Nenhum cargo encontrado com o filtro selecionado.</div></div>';
+
+    return Object.entries(porSetor).sort(function(a,b){return a[0].localeCompare(b[0],'pt-BR');}).map(function(entry){
+      var setor=entry[0],lista=entry[1];
+      var setorFolha=lista.reduce(function(s,d){return s+d.folha;},0);
+      var setorOcup=lista.reduce(function(s,d){return s+d.ocup;},0);
+      var setorVagas=lista.reduce(function(s,d){return s+d.vagas;},0);
+      var setorLivres=lista.reduce(function(s,d){return s+(d.vagas>0&&d.livres>0?d.livres:0);},0);
+
+      var linhas=lista.sort(function(a,b){return a.nome.localeCompare(b.nome,'pt-BR');}).map(function(d){
+        var pct=d.vagas>0?Math.min(100,Math.round(d.ocup/d.vagas*100)):null;
+        var corBarra=d.excedido?'#dc2626':pct>=80?'#d97706':'#16a34a';
+        var statusBg,statusCor,statusLabel;
+        if(d.semCad){statusBg='#fef3c7';statusCor='#92400e';statusLabel='⚠️ Sem cadastro';}
+        else if(!d.vagas){statusBg='#f3f4f6';statusCor='#6b7280';statusLabel='Sem limite';}
+        else if(d.excedido){statusBg='#fee2e2';statusCor='#dc2626';statusLabel='🚨 Excedido +'+(d.ocup-d.vagas);}
+        else if(d.livres===0){statusBg='#fee2e2';statusCor='#dc2626';statusLabel='🔴 Lotado';}
+        else if(d.livres<=2){statusBg='#fef9c3';statusCor='#d97706';statusLabel='⚠️ '+d.livres+' livre'+(d.livres>1?'s':'');}
+        else{statusBg='#dcfce7';statusCor='#16a34a';statusLabel='✅ '+d.livres+' livres';}
+
+        var barra=d.vagas>0
+          ?'<div style="margin-top:4px;background:#e5e7eb;border-radius:99px;height:4px"><div style="height:100%;background:'+corBarra+';width:'+Math.min(pct,100)+'%;border-radius:99px"></div></div>'
+           +'<div style="font-size:9px;color:var(--text3);margin-top:1px">'+d.ocup+(d.vagas?' / '+d.vagas:'')+' ocupadas'+(pct!==null?' ('+pct+'%)':'')+'</div>'
+          :'<div style="font-size:10px;color:var(--text3);margin-top:2px">'+d.ocup+' colaborador(es)</div>';
+
+        var colabsHtml=d.colabs.length
+          ?d.colabs.map(function(c){
+            var matchN=(c.cargo||'').match(/Nível\s*(\d+)/i);
+            var nivelBadge=matchN?'<span style="font-size:9px;background:#e0e7ff;color:#3730a3;padding:1px 5px;border-radius:99px;font-weight:700">N'+matchN[1]+'</span>':'';
+            return'<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">'
+              +'<div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(c.nome||'?')[0]+'</div>'
+              +'<span style="font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.nome+'</span>'
+              +nivelBadge
+              +'<span style="font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0">'+fmtMoeda(parseSalario(c.salario))+'</span>'
+              +'</div>';
+          }).join('')
+          :'<div style="font-size:12px;color:var(--text3);padding:6px 0">Nenhum colaborador neste cargo</div>';
+
+        // Mostra vagas em aberto detalhadas
+        var vagasLivresHtml='';
+        if(d.vagas>0&&d.livres>0){
+          vagasLivresHtml='<div style="margin-top:8px;padding:8px 10px;background:#dcfce7;border-radius:6px;border-left:3px solid #16a34a">'
+            +'<div style="font-size:11px;font-weight:700;color:#166534">🟢 '+d.livres+' vaga(s) em aberto</div>'
+            +'<div style="font-size:10px;color:#166534;margin-top:2px">Autorizado contratar até '+d.livres+' pessoa(s) para este cargo</div>'
+            +'</div>';
+        }
+        if(d.excedido){
+          vagasLivresHtml='<div style="margin-top:8px;padding:8px 10px;background:#fee2e2;border-radius:6px;border-left:3px solid #dc2626">'
+            +'<div style="font-size:11px;font-weight:700;color:#b91c1c">🚨 Quadro excedido em '+(d.ocup-d.vagas)+' colaborador(es)</div>'
+            +'<div style="font-size:10px;color:#b91c1c;margin-top:2px">Necessário regularizar antes de novas contratações</div>'
+            +'</div>';
+        }
+
+        var editBtn=d.reg
+          ?'<button onclick="event.stopPropagation();editarCargo(\''+d.reg.id+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;flex-shrink:0">✏️</button>'
+          :'<button onclick="event.stopPropagation();abrirModalCargo()" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;flex-shrink:0">＋ Cadastrar</button>';
+
+        return'<div style="border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden">'
+          +'<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);cursor:pointer" onclick="toggleCargoDetails(this)">'
+            +'<div style="flex:1;min-width:0">'
+              +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+                +'<span style="font-size:13px;font-weight:700">💼 '+d.nome+'</span>'
+                +'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:'+statusBg+';color:'+statusCor+'">'+statusLabel+'</span>'
+              +'</div>'
+              +(d.reg&&d.reg.salBase?'<div style="font-size:10px;color:var(--text3);margin-top:2px">Base: '+fmtMoeda(parseSalario(d.reg.salBase))+(d.reg.salMax?' · Máx: '+fmtMoeda(parseSalario(d.reg.salMax)):'')+'</div>':'')
+              +barra
+            +'</div>'
+            +'<div style="text-align:right;flex-shrink:0"><div style="font-size:10px;color:var(--text3)">Folha</div>'
+              +'<div style="font-size:13px;font-weight:700;color:var(--accent)">'+fmtMoeda(d.folha)+'</div></div>'
+            +editBtn
+            +'<span style="color:var(--text3);font-size:12px;flex-shrink:0">▼</span>'
+          +'</div>'
+          +'<div class="cargo-details" style="display:none;padding:10px 14px;border-top:1px solid var(--border)">'
+            +vagasLivresHtml
+            +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin:8px 0 6px">Colaboradores ('+d.colabs.length+')</div>'
+            +colabsHtml
+            +(d.reg&&d.reg.desc?'<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)"><b>Atribuições:</b> '+d.reg.desc+'</div>':'')
+          +'</div></div>';
+      }).join('');
+
+      return'<div style="margin-bottom:20px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(135deg,#1a5c38,#2d8a57);border-radius:var(--radius) var(--radius) 0 0;color:#fff">'
+          +'<div><div style="font-size:14px;font-weight:800">🏭 '+setor+'</div>'
+            +'<div style="font-size:11px;opacity:.8;margin-top:1px">'+lista.length+' cargo(s) · '+setorOcup+' colaboradores'+(setorVagas?' · '+setorLivres+' vagas livres':'')+'</div></div>'
+          +'<div style="text-align:right"><div style="font-size:10px;opacity:.7">Folha</div>'
+            +'<div style="font-size:15px;font-weight:800">'+fmtMoeda(setorFolha)+'</div></div>'
+        +'</div>'
+        +'<div style="padding:10px;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);background:var(--surface)">'+linhas+'</div>'
+        +'</div>';
+    }).join('');
   }
 
-  arvore.innerHTML=Object.entries(porSetor).sort(function(a,b){return a[0].localeCompare(b[0],'pt-BR');}).map(function(entry){
-    var setor=entry[0],nomes=entry[1];
-    var setorOcup=0,setorVagas=0,setorFolha=0,setorLivres=0;
-    nomes.forEach(function(nome){
-      var reg=cargoMap[nome];
-      var ocup=ativos.filter(function(c){return String(c.cargo||'').trim()===nome;}).length;
-      var vagas=reg?parseInt(reg.vagas)||0:0;
-      setorOcup+=ocup;setorVagas+=vagas;
-      if(vagas>0)setorLivres+=Math.max(0,vagas-ocup);
-      ativos.filter(function(c){return String(c.cargo||'').trim()===nome;}).forEach(function(c){setorFolha+=parseSalario(c.salario)||0;});
-    });
-
-    var linhas=nomes.sort(function(a,b){return a.localeCompare(b,'pt-BR');}).map(function(nome){
-      var reg=cargoMap[nome];
-      var collabs=ativos.filter(function(c){return String(c.cargo||'').trim()===nome;});
-      var ocup=collabs.length;
-      var vagas=reg?parseInt(reg.vagas)||0:0;
-      var livres=vagas>0?Math.max(0,vagas-ocup):null;
-      var pct=vagas>0?Math.min(100,Math.round(ocup/vagas*100)):null;
-      var folhaCargo=collabs.reduce(function(s,c){return s+(parseSalario(c.salario)||0);},0);
-      var statusCor,statusLabel,statusBg;
-      if(!vagas){statusCor='#6b7280';statusBg='#f3f4f6';statusLabel='Sem limite';}
-      else if(livres===0){statusCor='#dc2626';statusBg='#fee2e2';statusLabel='🔴 Lotado';}
-      else if(livres<=2){statusCor='#d97706';statusBg='#fef3c7';statusLabel='⚠️ '+livres+' livre'+(livres>1?'s':'');}
-      else{statusCor='#16a34a';statusBg='#dcfce7';statusLabel='✅ '+livres+' livres';}
-      var barraHtml=vagas>0
-        ?'<div style="margin-top:5px;background:#e5e7eb;border-radius:99px;height:4px"><div style="height:100%;background:'+(pct>=100?'#dc2626':pct>=80?'#d97706':'#16a34a')+';width:'+pct+'%;border-radius:99px"></div></div>'
-         +'<div style="font-size:9px;color:var(--text3);margin-top:2px">'+ocup+' / '+vagas+' ocupadas · '+pct+'%</div>'
-        :'<div style="font-size:10px;color:var(--text3);margin-top:3px">'+ocup+' colaborador(es)</div>';
-      var colabsHtml=collabs.length
-        ?collabs.map(function(c){
-          return'<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">'
-            +'<div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(c.nome||'?')[0]+'</div>'
-            +'<span style="font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.nome+'</span>'
-            +'<span style="font-size:10px;color:var(--text3);flex-shrink:0">'+c.empresa+'</span>'
-            +'<span style="font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0">'+fmtMoeda(parseSalario(c.salario))+'</span>'
-            +'</div>';
-        }).join('')
-        :'<div style="font-size:12px;color:var(--text3);padding:6px 0">Vaga disponível — sem colaborador</div>';
-      var editId2=reg?reg.id:'';
-      var editBtn=reg
-        ?'<button onclick="event.stopPropagation();editarCargo(\''+editId2+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;flex-shrink:0">✏️</button>'
-        :'<button onclick="event.stopPropagation();abrirModalCargo()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;flex-shrink:0">＋</button>';
-      return'<div style="border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden">'
-        +'<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);cursor:pointer" onclick="toggleCargoDetails(this)">'
-          +'<div style="flex:1;min-width:0">'
-            +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
-              +'<span style="font-size:13px;font-weight:700">💼 '+nome+'</span>'
-              +(!reg?'<span style="font-size:10px;color:#b45309;background:#fef3c7;padding:2px 6px;border-radius:99px">Sem cadastro</span>':'')
-              +'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:'+statusBg+';color:'+statusCor+'">'+statusLabel+'</span>'
-            +'</div>'
-            +(reg&&reg.salBase?'<div style="font-size:10px;color:var(--text3);margin-top:2px">Base: '+fmtMoeda(Number(reg.salBase))+(reg.salMax?' · Máx: '+fmtMoeda(Number(reg.salMax)):'')+'</div>':'')
-            +barraHtml
-          +'</div>'
-          +'<div style="text-align:right;flex-shrink:0"><div style="font-size:10px;color:var(--text3)">Folha</div>'
-            +'<div style="font-size:13px;font-weight:700;color:var(--accent)">'+fmtMoeda(folhaCargo)+'</div></div>'
-          +editBtn
-          +'<span style="color:var(--text3);font-size:12px;flex-shrink:0">▼</span>'
-        +'</div>'
-        +'<div class="cargo-details" style="display:none;padding:10px 14px;border-top:1px solid var(--border)">'
-          +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Colaboradores ('+collabs.length+')</div>'
-          +colabsHtml
-          +(reg&&reg.desc?'<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)"><b>Atribuições:</b> '+reg.desc+'</div>':'')
-          +(reg&&reg.req?'<div style="margin-top:4px;font-size:11px;color:var(--text3)"><b>Requisitos:</b> '+reg.req+'</div>':'')
-        +'</div></div>';
-    }).join('');
-
-    return'<div style="margin-bottom:20px">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(135deg,#1a5c38,#2d8a57);border-radius:var(--radius) var(--radius) 0 0;color:#fff">'
-        +'<div><div style="font-size:14px;font-weight:800">🏭 '+setor+'</div>'
-          +'<div style="font-size:11px;opacity:.8;margin-top:1px">'+nomes.length+' cargo(s) · '+setorOcup+' colaboradores'+(setorVagas?' · '+setorLivres+' vagas livres':'')+'</div></div>'
-        +'<div style="text-align:right"><div style="font-size:10px;opacity:.7">Folha do setor</div>'
-          +'<div style="font-size:15px;font-weight:800">'+fmtMoeda(setorFolha)+'</div></div>'
+  // Tab vagas em aberto — lista direta para contratar
+  function renderVagasAberto(){
+    var vagasAberto=dadosCargos.filter(function(d){return d.vagas>0&&d.livres>0;})
+      .sort(function(a,b){return b.livres-a.livres;});
+    if(!vagasAberto.length)
+      return'<div class="card"><div class="empty">Nenhuma vaga em aberto no momento.</div></div>';
+    return'<div class="card" style="padding:0;overflow:hidden">'
+      +'<div style="padding:10px 16px;border-bottom:1px solid var(--border);background:#f0fdf4">'
+        +'<div style="font-size:13px;font-weight:700;color:#166534">🟢 Vagas disponíveis para contratação</div>'
+        +'<div style="font-size:11px;color:#166534;margin-top:2px">Total: '+vagasAberto.reduce(function(s,d){return s+d.livres;},0)+' vaga(s) em aberto em '+vagasAberto.length+' cargo(s)</div>'
       +'</div>'
-      +'<div style="padding:10px;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);background:var(--surface)">'+linhas+'</div>'
-      +'</div>';
-  }).join('');
+      +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      +'<thead><tr style="background:#1a5c38;color:#fff">'
+        +'<th style="padding:8px 12px;text-align:left">Cargo</th>'
+        +'<th style="padding:8px 12px;text-align:left">Setor</th>'
+        +'<th style="padding:8px 12px;text-align:center">Vagas Totais</th>'
+        +'<th style="padding:8px 12px;text-align:center">Ocupadas</th>'
+        +'<th style="padding:8px 12px;text-align:center;background:#16a34a">Em Aberto</th>'
+        +'<th style="padding:8px 12px;text-align:right">Sal. Referência</th>'
+        +'<th style="padding:8px 12px;text-align:center">Ação</th>'
+      +'</tr></thead><tbody>'
+      +vagasAberto.map(function(d,i){
+        var bg=i%2===0?'var(--surface)':'var(--surface2)';
+        var salRef=d.reg&&d.reg.salBase?fmtMoeda(parseSalario(d.reg.salBase)):'—';
+        return'<tr style="background:'+bg+';border-bottom:1px solid var(--border)">'
+          +'<td style="padding:8px 12px;font-weight:600">'+d.nome+'</td>'
+          +'<td style="padding:8px 12px;color:var(--text3)">'+d.setor+'</td>'
+          +'<td style="padding:8px 12px;text-align:center">'+d.vagas+'</td>'
+          +'<td style="padding:8px 12px;text-align:center">'+d.ocup+'</td>'
+          +'<td style="padding:8px 12px;text-align:center"><span style="font-size:13px;font-weight:800;color:#16a34a">'+d.livres+'</span></td>'
+          +'<td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--accent)">'+salRef+'</td>'
+          +'<td style="padding:8px 12px;text-align:center">'
+            +(d.reg?'<button onclick="editarCargo(\''+d.reg.id+'\')" class="btn btn-sm">✏️ Editar</button>':'—')
+          +'</td>'
+          +'</tr>';
+      }).join('')
+      +'</tbody></table></div>';
+  }
+
+  // Tab custo por setor
+  function renderFolhaPorSetor(){
+    var porS={};
+    dadosCargos.forEach(function(d){
+      if(!porS[d.setor])porS[d.setor]={folha:0,colabs:0,cargos:0,vagas:0,livres:0};
+      porS[d.setor].folha+=d.folha;
+      porS[d.setor].colabs+=d.ocup;
+      porS[d.setor].cargos++;
+      porS[d.setor].vagas+=d.vagas;
+      porS[d.setor].livres+=d.vagas>0&&d.livres>0?d.livres:0;
+    });
+    var total=Object.values(porS).reduce(function(s,v){return s+v.folha;},0);
+    var rows=Object.entries(porS).sort(function(a,b){return b[1].folha-a[1].folha;});
+    return'<div class="card" style="padding:0;overflow:hidden">'
+      +'<div style="padding:10px 16px;border-bottom:1px solid var(--border)">'
+        +'<div style="font-size:13px;font-weight:700">💰 Custo da Folha por Setor</div>'
+        +'<div style="font-size:11px;color:var(--text3);margin-top:2px">Total geral: <b>'+fmtMoeda(total)+'</b></div>'
+      +'</div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+      +'<thead><tr style="background:#1a5c38;color:#fff">'
+        +'<th style="padding:8px 12px;text-align:left">Setor</th>'
+        +'<th style="padding:8px 12px;text-align:center">Cargos</th>'
+        +'<th style="padding:8px 12px;text-align:center">Colaboradores</th>'
+        +'<th style="padding:8px 12px;text-align:center">Vagas Livres</th>'
+        +'<th style="padding:8px 12px;text-align:right">Folha Bruta</th>'
+        +'<th style="padding:8px 12px;text-align:right">% do Total</th>'
+      +'</tr></thead><tbody>'
+      +rows.map(function(entry,i){
+        var s=entry[0],v=entry[1];
+        var pct=total>0?Math.round(v.folha/total*100):0;
+        var bg=i%2===0?'var(--surface)':'var(--surface2)';
+        return'<tr style="background:'+bg+';border-bottom:1px solid var(--border)">'
+          +'<td style="padding:8px 12px;font-weight:700">'+s+'</td>'
+          +'<td style="padding:8px 12px;text-align:center">'+v.cargos+'</td>'
+          +'<td style="padding:8px 12px;text-align:center">'+v.colabs+'</td>'
+          +'<td style="padding:8px 12px;text-align:center"><span style="color:'+(v.livres>0?'#16a34a':'var(--text3)')+'">'+v.livres+'</span></td>'
+          +'<td style="padding:8px 12px;text-align:right;font-weight:700;color:var(--accent)">'+fmtMoeda(v.folha)+'</td>'
+          +'<td style="padding:8px 12px;text-align:right">'
+            +'<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">'
+              +'<div style="width:60px;background:#e5e7eb;border-radius:99px;height:5px">'
+                +'<div style="height:100%;background:#1a5c38;width:'+pct+'%;border-radius:99px"></div>'
+              +'</div>'
+              +'<span style="font-size:11px;font-weight:600">'+pct+'%</span>'
+            +'</div>'
+          +'</td>'
+          +'</tr>';
+      }).join('')
+      +'<tr style="background:#1a5c38;color:#fff;font-weight:700">'
+        +'<td style="padding:8px 12px">TOTAL</td>'
+        +'<td style="padding:8px 12px;text-align:center">'+dadosCargos.length+'</td>'
+        +'<td style="padding:8px 12px;text-align:center">'+ativos.length+'</td>'
+        +'<td style="padding:8px 12px;text-align:center">'+dadosCargos.reduce(function(s,d){return s+(d.vagas>0&&d.livres>0?d.livres:0);},0)+'</td>'
+        +'<td style="padding:8px 12px;text-align:right">'+fmtMoeda(total)+'</td>'
+        +'<td style="padding:8px 12px;text-align:right">100%</td>'
+      +'</tr>'
+      +'</tbody></table></div>';
+  }
+
+  // Renderiza aba ativa
+  var tabAtiva=document.getElementById('qvtab-painel').style.display!=='none'?'painel'
+    :document.getElementById('qvtab-vagas').style.display!=='none'?'vagas':'folha';
+  document.getElementById('qvtab-painel').innerHTML=renderPainel();
+  document.getElementById('qvtab-vagas').innerHTML=renderVagasAberto();
+  document.getElementById('qvtab-folha').innerHTML=renderFolhaPorSetor();
+}
+
+function switchQvTab(tab){
+  ['painel','vagas','folha'].forEach(function(t){
+    document.getElementById('qvtab-'+t).style.display=t===tab?'block':'none';
+    var btn=document.getElementById('qvtab-btn-'+t);
+    if(btn){btn.style.borderBottomColor=t===tab?'var(--accent)':'transparent';btn.style.color=t===tab?'var(--accent)':'var(--text2)';}
+  });
 }
 
 function toggleCargoDetails(header){
