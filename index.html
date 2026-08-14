@@ -1076,6 +1076,31 @@ tbody tr:hover td{background:var(--bg)}
           </select>
         </div>
 
+        <!-- Painel de saldo — aparece ao selecionar colaborador -->
+        <div id="vale-saldo-painel" style="display:none;margin-bottom:14px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)">
+          <div style="padding:8px 12px;background:#1a5c38;color:#fff;font-size:11px;font-weight:700">💳 Situação do adiantamento — mês atual</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--surface2)">
+            <div style="padding:10px 12px;border-right:1px solid var(--border);text-align:center">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:2px">40% do Salário</div>
+              <div style="font-size:15px;font-weight:800;color:var(--text)" id="vale-s-limite">—</div>
+            </div>
+            <div style="padding:10px 12px;border-right:1px solid var(--border);text-align:center">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:2px">Vales no mês</div>
+              <div style="font-size:15px;font-weight:800;color:#d97706" id="vale-s-usado">—</div>
+            </div>
+            <div style="padding:10px 12px;text-align:center">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:2px">Saldo disponível</div>
+              <div style="font-size:15px;font-weight:800" id="vale-s-saldo">—</div>
+            </div>
+          </div>
+          <div id="vale-s-barra-wrap" style="padding:6px 12px 8px;background:var(--surface2);border-top:1px solid var(--border)">
+            <div style="background:#e5e7eb;border-radius:99px;height:6px;overflow:hidden">
+              <div id="vale-s-barra" style="height:100%;background:#16a34a;width:0%;border-radius:99px;transition:width .3s"></div>
+            </div>
+            <div id="vale-s-msg" style="font-size:10px;color:var(--text3);margin-top:3px;text-align:center"></div>
+          </div>
+        </div>
+
         <div id="vale-lote-container">
           <!-- itens dinâmicos -->
         </div>
@@ -7195,6 +7220,59 @@ function selecionarColabVale(){
   const container=document.getElementById('vale-lote-container');
   _valeLinhas=1;
   container.innerHTML=criarLinhaVale(0);
+  atualizarSaldoVale();
+}
+
+function atualizarSaldoVale(){
+  const colabId=document.getElementById('vale-colab').value;
+  const painel=document.getElementById('vale-saldo-painel');
+  if(!colabId){painel.style.display='none';return;}
+
+  const c=DB.colaboradores.find(function(x){return String(x.id)===String(colabId);});
+  if(!c){painel.style.display='none';return;}
+
+  const hoje=new Date();
+  const ano=hoje.getFullYear();
+  const mes=String(hoje.getMonth()+1).padStart(2,'0');
+  const ini=ano+'-'+mes+'-01';
+  const fim=ano+'-'+mes+'-15';
+
+  const salario=parseSalario(c.salario)||0;
+  const limite=Math.round(salario*0.40*100)/100;
+
+  // Soma vales do período 01-15 do mês atual
+  const totalVales=(DB.vales||[]).filter(function(v){
+    return String(v.colaboradorId)===String(colabId)&&v.data>=ini&&v.data<=fim;
+  }).reduce(function(s,v){return s+parseSalarioVale(v.valor);},0);
+
+  const saldo=Math.max(0,Math.round((limite-totalVales)*100)/100);
+  const pct=limite>0?Math.min(100,Math.round(totalVales/limite*100)):0;
+  const excedido=totalVales>limite;
+
+  // Atualiza UI
+  painel.style.display='block';
+  document.getElementById('vale-s-limite').textContent=fmtMoeda(limite);
+  document.getElementById('vale-s-usado').textContent=fmtMoeda(totalVales);
+
+  const saldoEl=document.getElementById('vale-s-saldo');
+  saldoEl.textContent=fmtMoeda(saldo);
+  saldoEl.style.color=excedido?'#dc2626':saldo===0?'#dc2626':saldo<limite*0.2?'#d97706':'#16a34a';
+
+  const barra=document.getElementById('vale-s-barra');
+  barra.style.width=pct+'%';
+  barra.style.background=excedido||pct>=100?'#dc2626':pct>=80?'#d97706':'#16a34a';
+
+  const msg=document.getElementById('vale-s-msg');
+  if(excedido){
+    msg.textContent='⚠️ Limite excedido em '+fmtMoeda(totalVales-limite)+' · Salário: '+fmtMoeda(salario);
+    msg.style.color='#dc2626';
+  } else if(saldo===0){
+    msg.textContent='🔴 Limite esgotado · Salário: '+fmtMoeda(salario);
+    msg.style.color='#dc2626';
+  } else {
+    msg.textContent=pct+'% utilizado · Salário: '+fmtMoeda(salario);
+    msg.style.color='var(--text3)';
+  }
 }
 
 function criarLinhaVale(idx){
@@ -7232,7 +7310,9 @@ function removerLinhaVale(idx){
 function limparFormVale(){
   document.getElementById('vale-colab').value='';
   document.getElementById('vale-obs').value='';
-  selecionarColabVale();
+  document.getElementById('vale-lote-container').innerHTML='';
+  document.getElementById('vale-saldo-painel').style.display='none';
+  _valeLinhas=0;
 }
 
 function salvarLoteVales(){
@@ -7256,7 +7336,13 @@ function salvarLoteVales(){
   salvarDB();
   sincronizarScript('salvar_vales',novos);
   notify(`✅ ${novos.length} vale(s) salvo(s) com sucesso!`);
+  // Mantém colaborador selecionado e atualiza o saldo após salvar
+  const colabIdAtual=document.getElementById('vale-colab').value;
   limparFormVale();
+  if(colabIdAtual){
+    document.getElementById('vale-colab').value=colabIdAtual;
+    selecionarColabVale();
+  }
   renderVales();
 }
 
