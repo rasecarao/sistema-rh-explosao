@@ -7549,7 +7549,7 @@ function previewItau(){
       var pc=parseConta(c.conta);
       var semBanco=!(c.agencia||c.conta);
       return{agencia:String(c.agencia||'').replace(/\D/g,''),conta:pc.conta,digito:pc.digito,nome:c.nome||'',cpf:cpfLimpo,finalidade:finalidade,valor:liquido>0?liquido:0,semBanco:semBanco,_bruto40:bruto40,_totalVales:totalVales,_colabId:String(c.id),_excedente:totalVales>bruto40?Math.round((totalVales-bruto40)*100)/100:0};
-    });
+    }).sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR');});
 
     // Detecta excedentes e abre modal de alerta
     var excedentes=_itauDados.filter(function(r){return r._excedente>0;});
